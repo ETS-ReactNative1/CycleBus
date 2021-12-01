@@ -20,6 +20,7 @@ import { StyleSheet } from "react-native";
 const initialState = {
   startLocation: { latitude: "", longitude: "" },
   endLocation: { latitude: "", longitude: "" },
+  marshalLocation: null,
   errors: {},
   isLoading: false,
 };
@@ -32,6 +33,7 @@ const galway = {
 };
 
 class Map extends Component {
+  ws = new WebSocket("ws://192.168.0.140:8000/ws/channel/");
   state = initialState;
 
   getLocation = async () => {
@@ -54,12 +56,26 @@ class Map extends Component {
       console.error(error);
     }
   };
-  componentWillUnmount() {
-    //this.getLocation();
+  componentDidMount() {
+    this.ws.onopen = () => {};
+    this.ws.onclose = (e) => {};
+    this.ws.onerror = (e) => {};
+    this.ws.onmessage = (e) => {
+      const location = JSON.parse(e.data);
+      console.log(location);
+
+      this.setState({
+        marshalLocation: {
+          latitude: parseFloat(location.split(",")[0]),
+          longitude: parseFloat(location.split(",")[1]),
+        },
+      });
+    };
+    this.getLocation();
   }
 
   render() {
-    const { isLoading } = this.state;
+    const { isLoading, marshalLocation } = this.state;
 
     return (
       <View style={styles.container}>
@@ -72,19 +88,20 @@ class Map extends Component {
           >
             <MapViewDirections
               origin={{
-                latitude: 53.26955995702022,
-                longitude: -9.103588614577953,
+                latitude: 53.279685388066596,
+                longitude: -9.07893079275496,
               }}
               destination={{
-                latitude: 53.270962,
-                longitude: -9.06269,
+                latitude: 53.268070295734994,
+                longitude: -9.076190483742975,
               }}
               lineDashPattern={[0]}
               apikey="AIzaSyA3-5ynktBhfyiWds08Jp2Bqn9hcDvYeH4"
               strokeWidth={4}
               strokeColor="#111111"
             />
-            <Marker
+            {marshalLocation && <Marker coordinate={marshalLocation} />}
+            {/* <Marker
               coordinate={{
                 latitude: 53.26955995702022,
                 longitude: -9.103588614577953,
@@ -95,7 +112,7 @@ class Map extends Component {
                 latitude: 53.270962,
                 longitude: -9.06269,
               }}
-            />
+            /> */}
           </MapView>
         </View>
       </View>

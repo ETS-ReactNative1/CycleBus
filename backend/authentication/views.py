@@ -5,6 +5,8 @@ from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.contrib.auth.models import Group
+
 
 from .serializers import(
     RegistrationSerializer,LoginSerializer, UserSerializer,
@@ -17,11 +19,15 @@ class RegistrationAPIView(APIView):
 
     def post(self, request):
         user = request.data.get('user', {})
+        role = user.pop('role','parent')
 
         # Create serializer, validate serializer, save serializer 
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        user=serializer.save()
+
+        group, is_created = Group.objects.get_or_create(name=role)
+        group.user_set.add(user)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

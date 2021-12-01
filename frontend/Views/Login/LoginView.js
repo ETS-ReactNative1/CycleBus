@@ -43,6 +43,8 @@ class Login extends Component {
     const onSuccess = ({ data }) => {
       // Set JSON Web Token on success
       setClientToken(data.token);
+      console.log(data);
+      //AsyncStorage.setItem("user", JSON.stringify(auth));
       this.setState({ isLoading: false, isAuthorized: true });
     };
 
@@ -157,8 +159,10 @@ class Login extends Component {
               <Text style={styles.loginButtonText}>LOGIN</Text>
             </TouchableOpacity>
           </View>
-        ) : (
+        ) : this.state.username === "anne@gmail.com" ? (
           this.props.navigation.navigate("Map")
+        ) : (
+          this.props.navigation.navigate("Ride")
         )}
       </View>
     );

@@ -32,6 +32,8 @@ class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=255, read_only=True)
     password = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(max_length=255, read_only=True)
+    groups = serializers.CharField(max_length=255, read_only=True)
+
 
     # matching against the database against registered credentials
     def validate(self, data):
@@ -65,11 +67,18 @@ class LoginSerializer(serializers.Serializer):
         return {
             'email': user.email,
             'username': user.username,
-            'token': user.token
+            'token': user.token,
+            'groups':user.groups
         }
 
 # called by UserRetrieveUpdateAPIView
 class UserSerializer(serializers.ModelSerializer):
+
+    groups = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field='name',
+    )  
 
     password = serializers.CharField(
         max_length=128,
@@ -79,7 +88,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'username', 'password', 'token',)
+        fields = ('email', 'username', 'password', 'token','groups')
         read_only_fields = ('token','email')
 
 

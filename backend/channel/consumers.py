@@ -18,7 +18,6 @@ class WSConsumer(WebsocketConsumer):
         )
 
     def receive(self, text_data):
-
         async_to_sync(self.channel_layer.group_send)(
             'parents',
             {

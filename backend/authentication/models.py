@@ -9,7 +9,6 @@ from django.conf import settings
 from django.contrib.auth.models import (
     AbstractBaseUser, BaseUserManager, PermissionsMixin
 )
-from django.db import models
 
 # UserManager inherits BaseUserManager
 class UserManager(BaseUserManager):
@@ -29,6 +28,7 @@ class UserManager(BaseUserManager):
         user = self.model(username=username, email=self.normalize_email(email))
         user.set_password(password)
         user.save()
+       
 
         return user
     #create super user
@@ -50,6 +50,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     # email: Used to uniquely identify when logging
     email = models.EmailField(db_index=True, unique=True)
+
+    #user_group : Used to manage views
+    #group_marshals = Group.objects.get_or_create(name='group_marshals')
+   
 
     # is_active : Used to activate, deactivate user 
     is_active = models.BooleanField(default=True)
