@@ -95,6 +95,12 @@ class Map extends Component {
                 latitude: 53.268070295734994,
                 longitude: -9.076190483742975,
               }}
+              waypoints={[
+                {
+                  latitude: 53.27289232102828,
+                  longitude: -9.070615803690446,
+                },
+              ]}
               lineDashPattern={[0]}
               apikey="AIzaSyA3-5ynktBhfyiWds08Jp2Bqn9hcDvYeH4"
               strokeWidth={4}
