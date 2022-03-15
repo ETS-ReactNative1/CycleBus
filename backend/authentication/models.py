@@ -14,19 +14,26 @@ from django.contrib.auth.models import (
 class UserManager(BaseUserManager):
 
     # create user objects
-    def create_user(self, username, email, password):
+    def create_user(self, name, email, username, password, password2):
 
-        if username is None:
-            raise TypeError('User should have a username.')
+        if name is None:
+            raise TypeError('User should have a name.')
 
         if email is None:
             raise TypeError('User should have an email address.')
 
+        if username is None:
+            raise TypeError('User should have a username.')
+
         if password is None:
             raise TypeError('User should submit a password.')
 
-        user = self.model(username=username, email=self.normalize_email(email))
+        if password2 is None:
+            raise TypeError('User should reenter the password.')
+
+        user = self.model(name=name, email=self.normalize_email(email), username=username )
         user.set_password(password)
+        #user.set_password(password)
         user.save()
        
 
@@ -53,6 +60,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     #user_group : Used to manage views
     #group_marshals = Group.objects.get_or_create(name='group_marshals')
+    name = models.CharField(db_index=True, max_length=255, unique=True)
    
 
     # is_active : Used to activate, deactivate user 

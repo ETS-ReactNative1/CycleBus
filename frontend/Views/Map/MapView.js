@@ -33,7 +33,7 @@ const galway = {
 };
 
 class Map extends Component {
-  ws = new WebSocket("ws://192.168.0.140:8000/ws/channel/");
+  ws = new WebSocket("ws://192.168.0.54:8000/ws/channel/");
   state = initialState;
 
   getLocation = async () => {
@@ -56,14 +56,13 @@ class Map extends Component {
       console.error(error);
     }
   };
+  
   componentDidMount() {
     this.ws.onopen = () => {};
     this.ws.onclose = (e) => {};
     this.ws.onerror = (e) => {};
     this.ws.onmessage = (e) => {
       const location = JSON.parse(e.data);
-      console.log(location);
-
       this.setState({
         marshalLocation: {
           latitude: parseFloat(location.split(",")[0]),
@@ -102,7 +101,7 @@ class Map extends Component {
                 },
               ]}
               lineDashPattern={[0]}
-              apikey="AIzaSyA3-5ynktBhfyiWds08Jp2Bqn9hcDvYeH4"
+              apikey="AIzaSyCBiU4oYll98xI7IocNOONCCgvkJr3dTZA"
               strokeWidth={4}
               strokeColor="#111111"
             />

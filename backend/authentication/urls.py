@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import re_path
 
 from .views import (
     RegistrationAPIView, LoginAPIView, UserRetrieveUpdateAPIView
@@ -6,7 +6,8 @@ from .views import (
 
 app_name = 'authentication'
 urlpatterns = [
-    path('user', UserRetrieveUpdateAPIView.as_view()),
-    path('users/', RegistrationAPIView.as_view()),
-    path('users/login/', LoginAPIView.as_view()),
+    re_path('user', UserRetrieveUpdateAPIView.as_view()),
+    # re_path('users/', RegistrationAPIView.as_view()),
+    re_path('login/', LoginAPIView.as_view()),
+    re_path('register/', RegistrationAPIView.as_view()),
 ]

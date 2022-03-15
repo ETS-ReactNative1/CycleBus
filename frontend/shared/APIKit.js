@@ -4,7 +4,7 @@ import axios from "axios";
 
 // Create axios client, pre-configured with baseURL
 let APIKit = axios.create({
-  baseURL: "http://192.168.0.140:8000/api/",
+  baseURL: "http://192.168.0.54:8000/api/",
   timeout: 10000,
 });
 

@@ -9,23 +9,36 @@
 
 import React, { Component } from "react";
 import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
+import {Picker} from '@react-native-picker/picker';
 
 import Spinner from "react-native-loading-spinner-overlay";
 
 import APIKit, { setClientToken } from "../../shared/APIKit";
 
 const initialState = {
-  username: "layani@email.com",
-  password: "layani@123",
+  name: "",
+  email: "",
+  username: "",
+  password: "",
+  password2: "",
   errors: {},
   isAuthorized: false,
   isLoading: false,
+  selectedValue: 0,
 };
 
-class Login extends Component {
+class Register extends Component {
   state = initialState;
 
-  componentWillUnmount() {}
+  componentWillUnmount() { }
+
+  onNameChange = (name) => {
+    this.setState({ name });
+  };
+
+  onEmailChange = (email) => {
+    this.setState({ email });
+  };
 
   onUsernameChange = (username) => {
     this.setState({ username });
@@ -35,30 +48,30 @@ class Login extends Component {
     this.setState({ password });
   };
 
-  onPressSignUp = () => {
-    this.props.navigation.push("Register")
+  onPassword2Change = (password2) => {
+    this.setState({ password2 });
   };
-  
-  onPressLogin() {
-    const { username, password } = this.state;
-    const payload = { user: { email: username, password: password } };
+
+  onPressRegister() {
+    const { name, email, username, password, password2 } = this.state;
+    const payload = { user: { name: name, email: email, username: username, password: password, password2: password2 } };
+
+    console.log(payload)
 
     const onSuccess = ({ data }) => {
-      // Set JSON Web Token on success
+      this.setState({ isLoading: false});
       setClientToken(data.token);
-      this.setState({ isLoading: false, isAuthorized: true });
-
+      this.props.navigation.navigate("ChildRegister")
     };
 
     const onFailure = (error) => {
-      console.log(error.response);
       this.setState({ errors: error.response.data, isLoading: false });
     };
 
     // Show spinner when call is made
     this.setState({ isLoading: true });
 
-    APIKit.post("login/", payload).then(onSuccess).catch(onFailure);
+    APIKit.post("api/register/", payload).then(onSuccess).catch(onFailure);
   }
 
   getNonFieldErrorMessage() {
@@ -97,6 +110,10 @@ class Login extends Component {
     return message;
   }
 
+  // onSelectedValueChange = (value) => {
+  //   this.setState({ selectedValue: value });
+  // };
+
   render() {
     const { isLoading } = this.state;
 
@@ -104,14 +121,53 @@ class Login extends Component {
       <View style={styles.containerStyle}>
         <Spinner visible={isLoading} />
 
-        {!this.state.isAuthorized ? (
           <View>
-            <View style={styles.logotypeContainer}>
-              <Image
-                source={require("../../assets/logo.png")}
-                style={styles.logotype}
-              />
-            </View>
+            <TextInput
+              style={styles.input}
+              value={this.state.name}
+              maxLength={256}
+              placeholder="Enter name..."
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="next"
+              onSubmitEditing={(event) =>
+                this.passwordInput.wrappedInstance.focus()
+              }
+              onChangeText={this.onNameChange}
+              underlineColorAndroid="transparent"
+              placeholderTextColor="#999"
+            />
+
+            {this.getErrorMessageByField("name")}
+
+            <TextInput
+              style={styles.input}
+              value={this.state.email}
+              maxLength={256}
+              placeholder="Enter email..."
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="next"
+              onSubmitEditing={(event) =>
+                this.passwordInput.wrappedInstance.focus()
+              }
+              onChangeText={this.onEmailChange}
+              underlineColorAndroid="transparent"
+              placeholderTextColor="#999"
+            />
+
+            {this.getErrorMessageByField("email")}
+
+            {/* <Picker
+              style={styles.dropdown}
+              selectedValue={selectedValue}
+              style={{ height: 50, width: 150 }}
+              onValueChange={this.onSelectedValueChange}
+            >
+              <Picker.Item label="Parent" value="parent" />
+              <Picker.Item label="Child" value="child" />
+              <Picker.Item label="Marshal" value="marshal" />
+            </Picker> */}
 
             <TextInput
               style={styles.input}
@@ -144,7 +200,7 @@ class Login extends Component {
               autoCorrect={false}
               returnKeyType="done"
               blurOnSubmit
-              onSubmitEditing={this.onPressLogin.bind(this)}
+              onSubmitEditing={this.onPressRegister.bind(this)}
               secureTextEntry
               underlineColorAndroid="transparent"
               placeholderTextColor="#999"
@@ -154,25 +210,38 @@ class Login extends Component {
 
             {this.getNonFieldErrorMessage()}
 
-            <TouchableOpacity
-              style={styles.loginButton}
-              onPress={this.onPressLogin.bind(this)}
-            >
-              <Text style={styles.loginButtonText}>LOGIN</Text>
-            </TouchableOpacity>
+            <TextInput
+              ref={(node) => {
+                this.password2Input = node;
+              }}
+              style={styles.input}
+              value={this.state.password2}
+              maxLength={40}
+              placeholder="Reenter password..."
+              onChangeText={this.onPassword2Change}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="done"
+              blurOnSubmit
+              onSubmitEditing={this.onPressRegister.bind(this)}
+
+
+              secureTextEntry
+              underlineColorAndroid="transparent"
+              placeholderTextColor="#999"
+            />
+
+            {this.getErrorMessageByField("password2")}
+
+            {this.getNonFieldErrorMessage()}
 
             <TouchableOpacity
-              style={styles.signUpButton}
-              onPress={this.onPressSignUp.bind(this)}
+              style={styles.registerButton}
+              onPress={this.onPressRegister.bind(this)}
             >
-              <Text style={styles.signUpButtonText}>REGISTER</Text>
+              <Text style={styles.registerButtonText}>NEXT</Text>
             </TouchableOpacity>
-
           </View>
-        ) 
-         : (
-          this.props.navigation.navigate("Home")
-        )}
       </View>
     );
   }
@@ -219,7 +288,7 @@ const styles = {
     shadowRadius: 4,
     marginBottom: utils.dimensions.defaultPadding,
   },
-  loginButton: {
+  registerButton: {
     borderColor: utils.colors.primaryColor,
     borderWidth: 2,
     padding: utils.dimensions.defaultPadding,
@@ -227,20 +296,7 @@ const styles = {
     justifyContent: "center",
     borderRadius: 6,
   },
-  loginButtonText: {
-    color: utils.colors.primaryColor,
-    fontSize: utils.fonts.mediumFontSize,
-    fontWeight: "bold",
-  },
-  signUpButton: {
-    borderColor: utils.colors.primaryColor,
-    borderWidth: 2,
-    padding: utils.dimensions.defaultPadding,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 6,
-  },
-  signUpButtonText: {
+  registerButtonText: {
     color: utils.colors.primaryColor,
     fontSize: utils.fonts.mediumFontSize,
     fontWeight: "bold",
@@ -256,6 +312,20 @@ const styles = {
     textAlign: "center",
     fontSize: 12,
   },
+  dropdown: {
+    height: 50,
+    padding: 12,
+    backgroundColor: "white",
+    borderRadius: 6,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    marginBottom: utils.dimensions.defaultPadding,
+  },
 };
 
-export default Login;
+export default Register;

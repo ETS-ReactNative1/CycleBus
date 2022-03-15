@@ -9,56 +9,58 @@
 
 import React, { Component } from "react";
 import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
+import {Picker} from '@react-native-picker/picker';
 
 import Spinner from "react-native-loading-spinner-overlay";
 
 import APIKit, { setClientToken } from "../../shared/APIKit";
 
 const initialState = {
-  username: "layani@email.com",
-  password: "layani@123",
-  errors: {},
-  isAuthorized: false,
-  isLoading: false,
+  bus_name: "",
+  country: "",
+  area: "",
+  child: "",
 };
 
-class Login extends Component {
+class BusRegister extends Component {
   state = initialState;
 
-  componentWillUnmount() {}
+  componentWillUnmount() { }
 
-  onUsernameChange = (username) => {
-    this.setState({ username });
+  onBusNameChange = (bus_name) => {
+    this.setState({ bus_name });
   };
 
-  onPasswordChange = (password) => {
-    this.setState({ password });
+  onCountryChange = (country) => {
+    this.setState({ country });
   };
 
-  onPressSignUp = () => {
-    this.props.navigation.push("Register")
+  onAreaChange = (area) => {
+    this.setState({ area });
   };
-  
-  onPressLogin() {
-    const { username, password } = this.state;
-    const payload = { user: { email: username, password: password } };
+
+  onChildChange = (chld) => {
+    this.setState({ child });
+  };
+
+  onPressBusRegister() {
+    const { bus_name, country, area, child } = this.state;
+    const payload = { busRegister: { bus_name: bus_name, country: country, area: area, child: child } };
 
     const onSuccess = ({ data }) => {
-      // Set JSON Web Token on success
-      setClientToken(data.token);
-      this.setState({ isLoading: false, isAuthorized: true });
-
+      this.setState({ isLoading: false});
+      this.props.navigation.navigate("HomeView")
     };
 
     const onFailure = (error) => {
-      console.log(error.response);
       this.setState({ errors: error.response.data, isLoading: false });
     };
 
     // Show spinner when call is made
     this.setState({ isLoading: true });
 
-    APIKit.post("login/", payload).then(onSuccess).catch(onFailure);
+    // APIKit.post("api/bus_register/", payload).then(onSuccess).catch(onFailure);
+    this.props.navigation.navigate("Home")
   }
 
   getNonFieldErrorMessage() {
@@ -97,6 +99,10 @@ class Login extends Component {
     return message;
   }
 
+  // onSelectedValueChange = (value) => {
+  //   this.setState({ selectedValue: value });
+  // };
+
   render() {
     const { isLoading } = this.state;
 
@@ -104,75 +110,102 @@ class Login extends Component {
       <View style={styles.containerStyle}>
         <Spinner visible={isLoading} />
 
-        {!this.state.isAuthorized ? (
           <View>
-            <View style={styles.logotypeContainer}>
-              <Image
-                source={require("../../assets/logo.png")}
-                style={styles.logotype}
-              />
-            </View>
-
             <TextInput
               style={styles.input}
-              value={this.state.username}
+              value={this.state.bus_name}
               maxLength={256}
-              placeholder="Enter username..."
+              placeholder="Select country..."
               autoCapitalize="none"
               autoCorrect={false}
               returnKeyType="next"
               onSubmitEditing={(event) =>
                 this.passwordInput.wrappedInstance.focus()
               }
-              onChangeText={this.onUsernameChange}
+              onChangeText={this.onBusNameChange}
               underlineColorAndroid="transparent"
               placeholderTextColor="#999"
             />
 
-            {this.getErrorMessageByField("username")}
+            {/* {this.getErrorMessageByField("bus_name")} */}
+
+            <TextInput
+              style={styles.input}
+              value={this.state.country}
+              maxLength={256}
+              placeholder="Select area..."
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="next"
+              onSubmitEditing={(event) =>
+                this.passwordInput.wrappedInstance.focus()
+              }
+              onChangeText={this.onCountryChange}
+              underlineColorAndroid="transparent"
+              placeholderTextColor="#999"
+            />
+
+            {/* {this.getErrorMessageByField("country")} */}
+
+            {/* <Picker
+              style={styles.dropdown}
+              selectedValue={selectedValue}
+              style={{ height: 50, width: 150 }}
+              onValueChange={this.onSelectedValueChange}
+            >
+              <Picker.Item label="Parent" value="parent" />
+              <Picker.Item label="Child" value="child" />
+              <Picker.Item label="Marshal" value="marshal" />
+            </Picker> */}
+
+            <TextInput
+              style={styles.input}
+              value={this.state.area}
+              maxLength={256}
+              placeholder="Select bus..."
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="next"
+              onSubmitEditing={(event) =>
+                this.passwordInput.wrappedInstance.focus()
+              }
+              onChangeText={this.onAreaChange}
+              underlineColorAndroid="transparent"
+              placeholderTextColor="#999"
+            />
+
+            {/* {this.getErrorMessageByField("area")} */}
 
             <TextInput
               ref={(node) => {
                 this.passwordInput = node;
               }}
               style={styles.input}
-              value={this.state.password}
+              value={this.state.child}
               maxLength={40}
-              placeholder="Enter password..."
-              onChangeText={this.onPasswordChange}
+              placeholder="Select child..."
+              onChangeText={this.onChildChange}
               autoCapitalize="none"
               autoCorrect={false}
               returnKeyType="done"
               blurOnSubmit
-              onSubmitEditing={this.onPressLogin.bind(this)}
+              // onSubmitEditing={this.onPressBusRegister.bind(this)}
               secureTextEntry
               underlineColorAndroid="transparent"
               placeholderTextColor="#999"
             />
+{/* 
+            {this.getErrorMessageByField("child")}
 
-            {this.getErrorMessageByField("password")}
-
-            {this.getNonFieldErrorMessage()}
-
-            <TouchableOpacity
-              style={styles.loginButton}
-              onPress={this.onPressLogin.bind(this)}
-            >
-              <Text style={styles.loginButtonText}>LOGIN</Text>
-            </TouchableOpacity>
+            {this.getNonFieldErrorMessage()} */}
 
             <TouchableOpacity
-              style={styles.signUpButton}
-              onPress={this.onPressSignUp.bind(this)}
+              style={styles.busRegisterButton}
+              onPress={this.onPressBusRegister.bind(this)}
             >
-              <Text style={styles.signUpButtonText}>REGISTER</Text>
+              <Text style={styles.busRegisterButtonText}>SUBMIT</Text>
             </TouchableOpacity>
-
           </View>
-        ) 
-         : (
-          this.props.navigation.navigate("Home")
-        )}
       </View>
     );
   }
@@ -219,7 +252,7 @@ const styles = {
     shadowRadius: 4,
     marginBottom: utils.dimensions.defaultPadding,
   },
-  loginButton: {
+  busRegisterButton: {
     borderColor: utils.colors.primaryColor,
     borderWidth: 2,
     padding: utils.dimensions.defaultPadding,
@@ -227,20 +260,7 @@ const styles = {
     justifyContent: "center",
     borderRadius: 6,
   },
-  loginButtonText: {
-    color: utils.colors.primaryColor,
-    fontSize: utils.fonts.mediumFontSize,
-    fontWeight: "bold",
-  },
-  signUpButton: {
-    borderColor: utils.colors.primaryColor,
-    borderWidth: 2,
-    padding: utils.dimensions.defaultPadding,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 6,
-  },
-  signUpButtonText: {
+  busRegisterButtonText: {
     color: utils.colors.primaryColor,
     fontSize: utils.fonts.mediumFontSize,
     fontWeight: "bold",
@@ -256,6 +276,20 @@ const styles = {
     textAlign: "center",
     fontSize: 12,
   },
+  dropdown: {
+    height: 50,
+    padding: 12,
+    backgroundColor: "white",
+    borderRadius: 6,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    marginBottom: utils.dimensions.defaultPadding,
+  },
 };
 
-export default Login;
+export default BusRegister;

@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
+from bus.models import Bus
 
 class Parent(models.Model):
     parent_id = models.IntegerField(primary_key=True)
@@ -26,11 +27,13 @@ class Child(models.Model):
     end_location = models.ForeignKey(
         "bus.Location", verbose_name="location", related_name="child_end_location", on_delete=models.CASCADE)
     join_location = models.ForeignKey(
-        "bus.Location", verbose_name="location", related_name="child_join_location", on_delete=models.CASCADE)
-    parent = models.ForeignKey("Parent", verbose_name="parent",
+        "bus.Location", verbose_name="location", related_name="child_join_location", on_delete=models.CASCADE, null=True)
+    parent = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name="parent",
                                related_name="child_parent", on_delete=models.CASCADE)
-    user_id = models.ForeignKey(
+    user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    registered_buses = models.ManyToManyField(
+        Bus, related_name='childs', blank =True)
     created_on = models.DateTimeField(default=timezone.now)
     last_updated = models.DateTimeField(blank=True, null=True)
 

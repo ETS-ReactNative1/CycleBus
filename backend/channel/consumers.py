@@ -5,26 +5,39 @@ from asgiref.sync import async_to_sync
 
 class WSConsumer(WebsocketConsumer):
     def connect(self):
-        async_to_sync(self.channel_layer.group_add)(
-            'parents',
-            self.channel_name
-        )
-        self.accept()
+        #TODO check eligibility
+        user = self.scope.get('user',None)
+        ride_id = self.scope['url_path']['kwargs'].get('id',None)
+        
+        if user is not None and ride_id is not None:
+            async_to_sync(self.channel_layer.group_add)(
+                ride_id,
+                self.channel_name
+            )
+            self.accept()
 
     def disconnect(self, close_code):
-        async_to_sync(self.channel_layer.group_discard)(
-            'parents',
-            self.channel_name
-        )
+        user = self.scope.get('user',None)
+        ride_id = self.scope['url_path']['kwargs'].get('id',None)
+
+        if user is not None and ride_id is not None:
+            async_to_sync(self.channel_layer.group_discard)(
+                ride_id,
+                self.channel_name
+            )
 
     def receive(self, text_data):
-        async_to_sync(self.channel_layer.group_send)(
-            'parents',
-            {
-                'type':'loc',
-                'text':text_data,
-            }
-        )
+        user = self.scope.get('user',None)
+        ride_id = self.scope['url_path']['kwargs'].get('id',None)
+
+        if user is not None and ride_id is not None:
+            async_to_sync(self.channel_layer.group_send)(
+                ride_id,
+                {
+                    'type':'loc',
+                    'text':text_data,
+                }
+            )
 
     def loc(self, res):
         self.send(text_data=json.dumps(

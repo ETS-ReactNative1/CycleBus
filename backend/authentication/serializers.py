@@ -1,14 +1,38 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
+from rest_framework.validators import UniqueValidator
+
+
+
 from .models import User
 
 # called by RegistrationAPIView
 class RegistrationSerializer(serializers.ModelSerializer):
     
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+    name= serializers.CharField(
+        max_length=128,
+        required=True
+    )
+    username= serializers.CharField(
+        max_length=128,
+        required=True
+    )
     password = serializers.CharField(
         max_length=128,
         min_length=8,
-        write_only=True
+        write_only=True,
+        required=True
+    )
+
+    password2 = serializers.CharField(
+        max_length=128,
+        min_length=8,
+        write_only=True,
+        required=True
     )
 
     # Avoid sending token along with registration request
@@ -18,7 +42,17 @@ class RegistrationSerializer(serializers.ModelSerializer):
         model = User
 
         # fields in a request
-        fields = ['email', 'username', 'password', 'token']
+        fields = ['name', 'email', 'username', 'password','password2','token']
+
+        extra_kwargs = {
+            'name': {'required': True}
+        }
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"password": "Password fields do not match."})
+
+        return attrs
 
     # create new user
     def create(self, validated_data):
@@ -74,40 +108,8 @@ class LoginSerializer(serializers.Serializer):
 # called by UserRetrieveUpdateAPIView
 class UserSerializer(serializers.ModelSerializer):
 
-    groups = serializers.SlugRelatedField(
-        many=True,
-        read_only=True,
-        slug_field='name',
-    )  
-
-    password = serializers.CharField(
-        max_length=128,
-        min_length=8,
-        write_only=True
-    )
-
     class Meta:
         model = User
-        fields = ('email', 'username', 'password', 'token','groups')
-        read_only_fields = ('token','email')
+        fields = ('id','name','email', 'username')
 
 
-    # update user
-    def update(self, instance, validated_data):
-        
-        password = validated_data.pop('password', None)
-
-        for (key, value) in validated_data.items():
-
-            # set validated data to user
-            setattr(instance, key, value)
-
-        if password is not None:
-          
-            # set password separately
-            instance.set_password(password)
-
-        # save the model
-        instance.save()
-
-        return instance
