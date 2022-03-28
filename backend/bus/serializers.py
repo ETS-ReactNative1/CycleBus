@@ -19,7 +19,7 @@ class LocationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Location
-        fields = ['longitude', 'latitude']
+        fields = ['location_id','location_type', 'location_name', 'longitude', 'latitude']
 
     def create(self, validated_data):
         return Location.objects.create(**validated_data)
@@ -49,11 +49,11 @@ class RouteSerializer(serializers.ModelSerializer):
         return route
 
 class RouteViewSerializer(serializers.ModelSerializer):
-    places = LocationSerializer(many=True)
+    locations= LocationSerializer(many=True)
     
     class Meta:
         model = Route
-        fields = ['route_id','route_name','places']
+        fields = ['route_id','route_name','locations']
 
     def to_representation(self, route):
         response = super().to_representation(route)
@@ -83,17 +83,18 @@ class BusSerializer(serializers.ModelSerializer):
 
 class RideSerializer(serializers.ModelSerializer):
 
+
     ride_id=serializers.IntegerField(read_only=True)
     weather = serializers.CharField(max_length=128,required=True)
     wind_speed = serializers.FloatField()
     date = serializers.DateTimeField(read_only=True)
-    bus_id = serializers.PrimaryKeyRelatedField(queryset=Bus.objects.all())
-    route_id = serializers.PrimaryKeyRelatedField(queryset=Route.objects.all())
-    marshal_id = serializers.PrimaryKeyRelatedField(read_only=True)
+    bus = serializers.PrimaryKeyRelatedField(queryset=Bus.objects.all())
+    route = serializers.PrimaryKeyRelatedField(queryset=Route.objects.all())
+    marshal= serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Ride
-        fields = ['ride_id','weather', 'wind_speed', 'date','bus_id', 'route_id', 'marshal_id']
+        fields = ['ride_id','weather', 'wind_speed', 'date','bus', 'route', 'marshal']
 
     def create(self, validated_data):
         return Ride.objects.create(**validated_data)

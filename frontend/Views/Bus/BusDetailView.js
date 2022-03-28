@@ -17,6 +17,7 @@ class BusDetail extends Component {
             busId:props.route.params.busId,
             busDetail:null,
         };
+        console.log(props);
     }
 
     
@@ -41,7 +42,7 @@ class BusDetail extends Component {
     }
 
     getListViewItem = (item) => {
-        this.props.navigation.navigate("RouteMap", {geoPoints:item.places});
+        this.props.navigation.navigate("RouteMap", {geoPoints:item.locations});
     }
 
 

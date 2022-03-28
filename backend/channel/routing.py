@@ -1,6 +1,7 @@
-from django.urls import path
+from django.urls import re_path
 from .consumers import WSConsumer
 
 websocket_urlpatterns = {
-    path('ws/bus/',WSConsumer.as_asgi()),
+    re_path(r'^ws/ride/(?P<id>\d+)/$', WSConsumer.as_asgi())
+
 }

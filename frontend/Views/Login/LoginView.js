@@ -171,7 +171,7 @@ class Login extends Component {
           </View>
         ) 
          : (
-          this.props.navigation.navigate("Home")
+          this.props.navigation.navigate("DrawerParent")
         )}
       </View>
     );

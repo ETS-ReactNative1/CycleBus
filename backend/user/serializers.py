@@ -1,6 +1,8 @@
 from pickle import TRUE
+from xml.dom.domreg import registered
 from authentication.serializers import RegistrationSerializer
 from authentication.serializers import UserSerializer
+from bus.serializers import LocationSerializer
 from bus.models import Bus
 from bus.serializers import BusSerializer
 from bus.serializers import RouteSerializer
@@ -16,14 +18,15 @@ from authentication.models import User
 class ChildSerializer(serializers.ModelSerializer):
     
     user = RegistrationSerializer()
-    start_location = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
-    end_location = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
+    start_location = LocationSerializer()
+    end_location = LocationSerializer()
+    join_location = LocationSerializer()
     parent = serializers.PrimaryKeyRelatedField(read_only=True)
     registered_buses = serializers.PrimaryKeyRelatedField(many=True,queryset=Bus.objects.all(), required=False)
 
     class Meta:
         model =  Child
-        fields = ['user','start_location','end_location','parent','registered_buses']
+        fields = ['user','start_location','end_location','join_location','parent','registered_buses']
         extra_kwargs = {'registered_buses': {'required': False}}
 
     # create new child with user data
@@ -47,7 +50,17 @@ class ChildSerializer(serializers.ModelSerializer):
 
     def to_representation(self, obj):
         data = super().to_representation(obj)
-        data['registered_buses'] = Bus.objects.filter(bus_id__in=data['registered_buses']).values_list('bus_id','bus_name')
+        buses = Bus.objects.filter(bus_id__in=data['registered_buses'])
+        out = []
+        for bus in buses:
+            ride=bus.ride_bus.filter(end__isnull=True).last()
+            out.append({
+                "bus_id":bus.bus_id,
+                "bus_name":bus.bus_name,
+                "ride_id": ride.ride_id if ride else None,
+                "route_id": ride.route_id if ride else None
+            })
+        data['registered_buses'] = out
         return data 
 
 

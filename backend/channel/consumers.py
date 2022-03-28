@@ -7,7 +7,7 @@ class WSConsumer(WebsocketConsumer):
     def connect(self):
         #TODO check eligibility
         user = self.scope.get('user',None)
-        ride_id = self.scope['url_path']['kwargs'].get('id',None)
+        ride_id = self.scope['url_route']['kwargs'].get('id',None)
         
         if user is not None and ride_id is not None:
             async_to_sync(self.channel_layer.group_add)(
@@ -18,7 +18,7 @@ class WSConsumer(WebsocketConsumer):
 
     def disconnect(self, close_code):
         user = self.scope.get('user',None)
-        ride_id = self.scope['url_path']['kwargs'].get('id',None)
+        ride_id = self.scope['url_route']['kwargs'].get('id',None)
 
         if user is not None and ride_id is not None:
             async_to_sync(self.channel_layer.group_discard)(
@@ -28,8 +28,8 @@ class WSConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         user = self.scope.get('user',None)
-        ride_id = self.scope['url_path']['kwargs'].get('id',None)
-
+        ride_id = self.scope['url_route']['kwargs'].get('id',None)
+        print(text_data)
         if user is not None and ride_id is not None:
             async_to_sync(self.channel_layer.group_send)(
                 ride_id,

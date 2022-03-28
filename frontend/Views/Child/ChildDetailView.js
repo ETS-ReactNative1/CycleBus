@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { FlatList, SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Button, FlatList, SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import APIKit from '../../shared/APIKit';
 
 const initialState = {
-    childId:null,
-    childDetail:null,
+    childId: null,
+    childDetail: null,
 };
 
 class ChildDetail extends Component {
@@ -14,15 +14,15 @@ class ChildDetail extends Component {
 
     constructor(props) {
         super(props)
-        this.state = {    
-            childId:props.route.params.childId,
-            childDetail:null,
+        this.state = {
+            childId: props.route.params.childId,
+            childDetail: null,
         };
     }
 
-    
+
     async componentDidMount() {
-        const {childId} = this.state;
+        const { childId } = this.state;
         const onSuccess = ({ data }) => {
             this.setState({ childDetail: data.child, isLoading: false });
         };
@@ -33,7 +33,7 @@ class ChildDetail extends Component {
 
         // Show spinner when call is made
         this.setState({ isLoading: true });
-        APIKit.get("child/"+childId).then(onSuccess).catch(onFailure);
+        APIKit.get("child/" + childId).then(onSuccess).catch(onFailure);
 
     }
 
@@ -42,7 +42,13 @@ class ChildDetail extends Component {
     }
 
     getListViewItem = (item) => {
-        this.props.navigation.navigate("MapView", { busId: item[0] });
+        
+        this.props.navigation.navigate("ParentRide", {
+            rideId: item.ride_id,
+            routeId: item.route_id,
+            busId: item.bus_id,
+            childDetail: this.state.childDetail
+        });
     }
 
 
@@ -56,8 +62,8 @@ class ChildDetail extends Component {
                     sections={[
                         { title: 'Name', data: [childDetail?.user.name] },
                         { title: 'Email', data: [childDetail?.user.email] },
-                        { title: 'Start Location', data: [childDetail?.start_location] },
-                        { title: 'End Location', data: [childDetail?.end_location] },
+                        { title: 'Start Location', data: [childDetail?.start_location.location_id] },
+                        { title: 'End Location', data: [childDetail?.end_location.location_id] },
                     ]}
                     renderItem={({ item }) => <Text style={styles.item}>{item}</Text>}
                     renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}>{section.title}</Text>}
@@ -67,8 +73,16 @@ class ChildDetail extends Component {
                 <FlatList
                     data={this.state.childDetail?.registered_buses}
                     renderItem={({ item }) =>
-                        <Text style={styles.item}
-                            onPress={this.getListViewItem.bind(this, item)}>{item[1]}</Text>}
+                        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+                            <Text style={styles.item}>{item.bus_name}</Text>
+                            <View style={{ flex: 1, flexDirection: 'row-reverse' }}>
+                                {item.ride_id && <Button title='Ride' onPress={this.getListViewItem.bind(this, item)} />}
+                                {/* <Button title='Select' onPress={this.selectListViewItem.bind(this, item)} /> */}
+                            </View>
+                        </View>
+
+                    }
+
                     ItemSeparatorComponent={this.renderSeparator}
                     keyExtractor={(item, index) => index.toString()}
                 />

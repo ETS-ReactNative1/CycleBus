@@ -44,7 +44,7 @@ class Route(models.Model):
     route_id = models.AutoField(primary_key=True)
     route_name = models.CharField(max_length=100)
     bus = models.ForeignKey("Bus", verbose_name="bus", related_name="route_buses", on_delete=models.CASCADE)
-    places = models.ManyToManyField(Location, through='RouteIndex',verbose_name="route_locations",related_name="route_locations")
+    locations = models.ManyToManyField(Location, through='RouteIndex',verbose_name="route_locations",related_name="route_locations")
     
     def __str__(self):
         return self.route_id
@@ -59,10 +59,11 @@ class RouteIndex(models.Model):
 
 
 class Ride(models.Model):
-    ride_id = models.IntegerField(primary_key=True)
+    ride_id = models.AutoField(primary_key=True)
     weather = models.CharField(max_length=100)
     wind_speed = models.FloatField()
-    date = models.DateTimeField(default=timezone.now)
+    start = models.DateTimeField(default=timezone.now)
+    end = models.DateTimeField(blank=True, null=True)
     bus = models.ForeignKey("Bus", verbose_name="bus",
                             related_name="ride_bus", on_delete=models.CASCADE)
     route = models.ForeignKey("Route", verbose_name="route",

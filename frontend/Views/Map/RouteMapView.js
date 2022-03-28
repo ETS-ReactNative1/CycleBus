@@ -35,16 +35,17 @@ class RouteMap extends Component {
     constructor(props) {
         super(props)
         data = props.route.params.geoPoints.map(({ longitude, latitude }) => ({ longitude: parseFloat(longitude), latitude: parseFloat(latitude) }));
-
         this.state = {
-            geoPoints: data
+            start: data[0],
+            waypoints: data.slice(1, -1),
+            end:data[data.length - 1]
         };
 
         console.log(data)
     }
 
     render() {
-        const { isLoading, geoPoints } = this.state;
+        const { isLoading, start, waypoints,end } = this.state;
 
         return (
             <View style={styles.container}>
@@ -56,17 +57,29 @@ class RouteMap extends Component {
 
                     >
                         <MapViewDirections
-                           origin = {geoPoints[0]}
-                           destination= {geoPoints[geoPoints.length - 1]}
-                            waypoints={geoPoints}
+                           origin = {start}
+                           destination= {end}
+                            waypoints={waypoints}
                             lineDashPattern={[0]}
                             apikey="AIzaSyCBiU4oYll98xI7IocNOONCCgvkJr3dTZA"
                             strokeWidth={4}
                             strokeColor="#111111"
+                            mode="BICYCLING"
+                            optimizeWaypoints = {false}
                             
                         />
-                        <Marker coordinate={geoPoints[0]} />
-                        <Marker coordinate={geoPoints[geoPoints.length - 1]} />
+                        <Marker coordinate={start} />
+                        <Marker coordinate={end} />
+
+                        {waypoints.map((marker,i) => (
+                            <MapView.Marker 
+                            pinColor={'green'}
+                            
+                            coordinate={marker}
+                            title={i.toString()}
+                            key={i}>
+                            </MapView.Marker>
+                        ))}
                         
                         {/* <Polyline
                             coordinates={geoPoints}

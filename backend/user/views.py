@@ -48,6 +48,7 @@ class ChildAPIView(APIView):
             serializer = ChildSerializer(child)
             return Response({ "child": serializer.data}, status=status.HTTP_200_OK)
 
+
         children = Child.objects.filter(parent_id=request.user.id)
         serializer = ChildListSerializer(children, many=True)
         return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
@@ -62,3 +63,5 @@ class ChildBusAPIView(APIView):
         buses = Child.objects.get(user_id=id).registered_buses.all()
         serializer = BusSerializer(buses, many=True)
         return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+
+
