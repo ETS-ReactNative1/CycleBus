@@ -9,15 +9,11 @@
 
 import React, { Component } from "react";
 import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
-import { Picker } from '@react-native-picker/picker';
+import {Picker} from '@react-native-picker/picker';
 
 import Spinner from "react-native-loading-spinner-overlay";
 
 import APIKit, { setClientToken } from "../../shared/APIKit";
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import * as Animatable from 'react-native-animatable';
-import Feather from 'react-native-vector-icons/Feather';
-import { LinearGradient } from 'expo-linear-gradient';
 
 const initialState = {
   name: "",
@@ -29,7 +25,6 @@ const initialState = {
   isAuthorized: false,
   isLoading: false,
   selectedValue: 0,
-  secureTextEntry: true,
 };
 
 class Register extends Component {
@@ -64,7 +59,7 @@ class Register extends Component {
     console.log(payload)
 
     const onSuccess = ({ data }) => {
-      this.setState({ isLoading: false });
+      this.setState({ isLoading: false});
       setClientToken(data.token);
       this.props.navigation.navigate("ChildRegister")
     };
@@ -85,7 +80,7 @@ class Register extends Component {
     const { errors } = this.state;
     if (errors.non_field_errors) {
       message = (
-        <View style={styles.actionError}>
+        <View style={styles.errorMessageContainerStyle}>
           {errors.non_field_errors.map((item) => (
             <Text style={styles.errorMessageTextStyle} key={item}>
               {item}
@@ -103,7 +98,7 @@ class Register extends Component {
     let message = null;
     if (this.state.errors[field]) {
       message = (
-        <View style={styles.actionError}>
+        <View style={styles.errorMessageContainerStyle}>
           {this.state.errors[field].map((item) => (
             <Text style={styles.errorMessageTextStyle} key={item}>
               {item}
@@ -115,29 +110,20 @@ class Register extends Component {
     return message;
   }
 
-  updateSecureTextEntry = () => {
-    this.setState({ secureTextEntry: !this.state.secureTextEntry });
-  }
+  // onSelectedValueChange = (value) => {
+  //   this.setState({ selectedValue: value });
+  // };
 
   render() {
     const { isLoading } = this.state;
 
     return (
-      <View style={styles.container}>
+      <View style={styles.containerStyle}>
         <Spinner visible={isLoading} />
-        <View style={styles.header}>
-          <Text style={styles.text_header}>Register</Text>
-        </View>
-        <Animatable.View animation="fadeInUpBig" style={[styles.footer]}>
 
-          <Text style={styles.text_footer}>Name</Text>
-
-          <View style={styles.action}>
-
-            <FontAwesome name="user-o" color="blue" size={20} />
-
+          <View>
             <TextInput
-              style={styles.textInput}
+              style={styles.input}
               value={this.state.name}
               maxLength={256}
               placeholder="Enter name..."
@@ -153,12 +139,9 @@ class Register extends Component {
             />
 
             {this.getErrorMessageByField("name")}
-          </View>
-          <Text style={styles.text_footer}>Email</Text>
-          <View style={styles.action}>
-            <FontAwesome name="envelope-o" color="blue" size={20} />
+
             <TextInput
-              style={styles.textInput}
+              style={styles.input}
               value={this.state.email}
               maxLength={256}
               placeholder="Enter email..."
@@ -175,12 +158,19 @@ class Register extends Component {
 
             {this.getErrorMessageByField("email")}
 
-          </View>
-          <Text style={styles.text_footer}>Username</Text>
-          <View style={styles.action}>
-            <FontAwesome name="user-o" color="blue" size={20} />
+            {/* <Picker
+              style={styles.dropdown}
+              selectedValue={selectedValue}
+              style={{ height: 50, width: 150 }}
+              onValueChange={this.onSelectedValueChange}
+            >
+              <Picker.Item label="Parent" value="parent" />
+              <Picker.Item label="Child" value="child" />
+              <Picker.Item label="Marshal" value="marshal" />
+            </Picker> */}
+
             <TextInput
-              style={styles.textInput}
+              style={styles.input}
               value={this.state.username}
               maxLength={256}
               placeholder="Enter username..."
@@ -196,17 +186,12 @@ class Register extends Component {
             />
 
             {this.getErrorMessageByField("username")}
-          </View>
-          <Text style={styles.text_footer}>Password</Text>
-          <View style={styles.action}>
-            <Feather name="lock" color="blue" size={20} />
-
 
             <TextInput
               ref={(node) => {
                 this.passwordInput = node;
               }}
-              style={styles.textInput}
+              style={styles.input}
               value={this.state.password}
               maxLength={40}
               placeholder="Enter password..."
@@ -216,40 +201,20 @@ class Register extends Component {
               returnKeyType="done"
               blurOnSubmit
               onSubmitEditing={this.onPressRegister.bind(this)}
-              secureTextEntry={this.state.secureTextEntry ? true : false}
+              secureTextEntry
               underlineColorAndroid="transparent"
               placeholderTextColor="#999"
             />
-            <TouchableOpacity
-              onPress={this.updateSecureTextEntry}
-            >
-              {this.state.secureTextEntry ?
-                <Feather
-                  name="eye-off"
-                  color="grey"
-                  size={20}
-                />
-                :
-                <Feather
-                  name="eye"
-                  color="grey"
-                  size={20}
-                />
-              }
-            </TouchableOpacity>
+
             {this.getErrorMessageByField("password")}
 
             {this.getNonFieldErrorMessage()}
-          </View>
-          <Text style={styles.text_footer}>Confirm Password</Text>
-          <View style={styles.action}>
-            <Feather name="lock" color="blue" size={20} />
 
             <TextInput
               ref={(node) => {
                 this.password2Input = node;
               }}
-              style={styles.textInput}
+              style={styles.input}
               value={this.state.password2}
               maxLength={40}
               placeholder="Reenter password..."
@@ -259,143 +224,107 @@ class Register extends Component {
               returnKeyType="done"
               blurOnSubmit
               onSubmitEditing={this.onPressRegister.bind(this)}
-              secureTextEntry={this.state.secureTextEntry ? true : false}
+
+
+              secureTextEntry
               underlineColorAndroid="transparent"
               placeholderTextColor="#999"
             />
 
-            <TouchableOpacity
-              onPress={this.updateSecureTextEntry}
-            >
-              {this.state.secureTextEntry ?
-                <Feather
-                  name="eye-off"
-                  color="grey"
-                  size={20}
-                />
-                :
-                <Feather
-                  name="eye"
-                  color="grey"
-                  size={20}
-                />
-              }
-            </TouchableOpacity>
-
             {this.getErrorMessageByField("password2")}
 
             {this.getNonFieldErrorMessage()}
-          </View>
 
-          <View style={styles.button}>
             <TouchableOpacity
-              style={styles.signUp}
+              style={styles.registerButton}
               onPress={this.onPressRegister.bind(this)}
             >
-              <LinearGradient colors={['#1E90FF', '#1E90FF']} style={styles.signUp}>
-                <Text style={styles.textSign}>Next</Text>
-              </LinearGradient>
+              <Text style={styles.registerButtonText}>NEXT</Text>
             </TouchableOpacity>
           </View>
-
-        </Animatable.View>
-      </View >
+      </View>
     );
   }
 }
 
+// Define some colors and default sane values
+const utils = {
+  colors: { primaryColor: "blue" },
+  dimensions: { defaultPadding: 12 },
+  fonts: { largeFontSize: 18, mediumFontSize: 16, smallFontSize: 12 },
+};
+
 // Define styles here
 const styles = {
-
-  container: {
-    flex: 1,
-    backgroundColor: "#1E90FF",
+  innerContainer: {
+    marginBottom: 32,
   },
-
-  text_footer: {
-    color: { primaryColor: "blue" },
-    marginTop: 15,
-    fontSize: 18
+  logotypeContainer: {
+    alignItems: "center",
   },
-
-  footer: {
-    flex: 3,
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    paddingHorizontal: 20,
-    paddingVertical: 30
+  logotype: {
+    maxWidth: 280,
+    maxHeight: 100,
+    resizeMode: "contain",
+    alignItems: "center",
   },
-
-  action: {
-    flexDirection: 'row',
-    marginTop: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f2f2f2',
-    paddingBottom: 5
-  },
-
-  textInput: {
-    flex: 1,
-    marginTop: Platform.OS === 'ios' ? 0 : -12,
-    paddingLeft: 10,
-    color: '#05375a',
-  },
-
-  button: {
-    alignItems: 'center',
-    marginTop: 30,
-    color: '#1E90FF',
-  },
-
-  signUp: {
-    width: '100%',
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10,
-    color: '#1E90FF',
-  },
-
-  textSign: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-
   containerStyle: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#f6f6f6",
   },
-
+  input: {
+    height: 50,
+    padding: 12,
+    backgroundColor: "white",
+    borderRadius: 6,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    marginBottom: utils.dimensions.defaultPadding,
+  },
+  registerButton: {
+    borderColor: utils.colors.primaryColor,
+    borderWidth: 2,
+    padding: utils.dimensions.defaultPadding,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 6,
+  },
+  registerButtonText: {
+    color: utils.colors.primaryColor,
+    fontSize: utils.fonts.mediumFontSize,
+    fontWeight: "bold",
+  },
+  errorMessageContainerStyle: {
+    marginBottom: 8,
+    backgroundColor: "#fee8e6",
+    padding: 8,
+    borderRadius: 4,
+  },
   errorMessageTextStyle: {
     color: "#db2828",
     textAlign: "center",
     fontSize: 12,
   },
-
-  actionError: {
-    flexDirection: 'row',
-    paddingBottom: 5,
-    marginBottom: 4,
-    backgroundColor: "#fee8e6",
-    padding: 8,
-    borderRadius: 4,
-  },
-
-  header: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    paddingHorizontal: 20,
-    paddingBottom: 80
-  },
-
-  text_header: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 30
+  dropdown: {
+    height: 50,
+    padding: 12,
+    backgroundColor: "white",
+    borderRadius: 6,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    marginBottom: utils.dimensions.defaultPadding,
   },
 };
 

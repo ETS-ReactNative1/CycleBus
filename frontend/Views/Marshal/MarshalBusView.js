@@ -12,21 +12,10 @@ const initialState = {
 class MarshalBus extends Component {
     state = initialState;
 
-    constructor(props) {
-        super(props)
-        this.state = {
-            childId: props.route.params.childId
-        };
-    }
-
     async componentDidMount() {
 
         const onSuccess = ({ data }) => {
 
-            filtered_data = data.locations.filter((x) =>
-        x.location_name !== ""
-      )
-      
             this.setState({ dataSource: data.data, isLoading: false });
         };
 
@@ -37,7 +26,7 @@ class MarshalBus extends Component {
         // Show spinner when call is made
         this.setState({ isLoading: true });
 
-        APIKit.get("bus/").then(onSuccess).catch(onFailure);
+        APIKit.get("marshal_bus/").then(onSuccess).catch(onFailure);
 
     }
 
@@ -54,28 +43,7 @@ class MarshalBus extends Component {
     };
 
     getListViewItem = (item) => {
-        this.props.navigation.navigate("BusDetail", { busId: item.bus_id })
-    }
-
-    selectListViewItem = (item) => {
-
-        const { childId } = this.state;
-
-        const payload = { child: { registered_buses: [item.bus_id] } };
-
-        const onSuccess = ({ data }) => {
-            this.setState({ isLoading: false });
-            this.props.navigation.push("ChildDetail", { childId: childId })
-        };
-
-        const onFailure = (error) => {
-            this.setState({ errors: error.response.data, isLoading: false });
-        };
-
-        // Show spinner when call is made
-        this.setState({ isLoading: true });
-
-        APIKit.put("child/" + childId + '/', payload).then(onSuccess).catch(onFailure);
+        this.props.navigation.navigate("MarshalRide", { busId: item.bus_id , routeId : item.default_route})
     }
 
     render() {
@@ -87,8 +55,7 @@ class MarshalBus extends Component {
                         <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
                             <Text style={styles.item}>{item.bus_name}</Text>
                             <View style={{ flex: 1, flexDirection: 'row-reverse' }}>
-                                <Button title='View' onPress={this.getListViewItem.bind(this, item)} />
-                                <Button title='Select' onPress={this.selectListViewItem.bind(this, item)} />
+                                <Button title='Ride' onPress={this.getListViewItem.bind(this, item)} />
                             </View>
                         </View>
                     }

@@ -26,12 +26,13 @@ const App = () => {
         <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
         <Stack.Screen name="DrawerParent" component={DrawerNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="ChildDetail" component={ChildDetail} options={{ title: "Child Detail" }} />
-        <Stack.Screen name="Register" component={Register} options={{ title: "Register" }} />
-        <Stack.Screen name="ChildRegister" component={ChildRegister} options={{ title: "Register Child" }} />
+        <Stack.Screen name="Register" component={Register} options={/**{ title: "Register" }**/ { headerShown: false }} />
+        <Stack.Screen name="ChildRegister" component={ChildRegister} options={{ headerShown: false }} />
         <Stack.Screen name="Parent" component={Parent} options={{ title: "Parent" }} />
         <Stack.Screen name="BusRegister" component={BusRegister} options={{ title: "Register to a Bus" }} />
         <Stack.Screen name="BusList" component={BusList} options={{ title: "Bus List " }} />
         <Stack.Screen name="ParentRide" component={ParentRide} options={{ title: "Ride View " }} />
+        <Stack.Screen name="MarshalRide" component={MarshalRide} options={{ title: "Ride View " }} />
         <Stack.Screen name="Map" component={Map} />
         <Stack.Screen name="BusDetail" component={BusDetail} />
         <Stack.Screen name="RouteMap" component={RouteMap} />

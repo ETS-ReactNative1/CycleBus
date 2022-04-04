@@ -8,7 +8,7 @@
 // <ROOT>/App/Views/Login/LoginView.js
 
 import React, { Component } from "react";
-import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
+import { View, Text, TouchableOpacity, Image, TextInput, Button } from "react-native";
 import MapView, { Polyline } from "react-native-maps";
 import { decode } from "@mapbox/polyline";
 import MapViewDirections from "react-native-maps-directions";
@@ -17,8 +17,10 @@ import { StyleSheet } from "react-native";
 import APIKit from "../../shared/APIKit";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import GeoMarker from "./Marker";
+import axios from "axios";
 
 
+const GOOGLE_MAPS_API_KEY = "AIzaSyCBiU4oYll98xI7IocNOONCCgvkJr3dTZA";
 const galway = {
   latitude: 53.270962,
   longitude: -9.06269,
@@ -50,10 +52,17 @@ class ParentRide extends Component {
       isLoading: false,
       count: 0,
       isStarted: false,
-      marshalLocation : null,
-
+      marshalLocation: null,
+      status: false,
+      time: 0,
+      timeInMin : 0,
+    
+      
 
     };
+
+
+    this.DisplayTime();
 
 
     this.ws = new WebSocket("ws://192.168.0.54:8000/ws/ride/" + this.state.rideId + "/");
@@ -71,13 +80,90 @@ class ParentRide extends Component {
       });
     };
   }
-  
+
+  getTravelTime() {
+    const { marshalLocation, joinLocation } = this.state
+    if (marshalLocation) {
+      const origin = marshalLocation.latitude + ',' + marshalLocation.longitude;
+      const destination = joinLocation.latitude+','+joinLocation.longitude;
+      const mode = "bicycling";
+      const key = GOOGLE_MAPS_API_KEY;
+      var axios = require('axios');
+      const url = 'https://maps.googleapis.com/maps/api/distancematrix/json?origins=' + [origin] + '&destinations=' + [destination] + '&units=imperial&key=' + key +'&mode=' + [mode];
+      console.log(url)
+      var config = {
+        method: 'get',
+        url: url,
+        headers: {}
+      };
+
+      axios(config)
+        .then((response) => {
+          console.log(JSON.stringify(response.data));
+          const jsonObj = JSON.parse(JSON.stringify(response.data));
+          console.log(jsonObj.rows.elements);
+          this.setState({ time: jsonObj.rows[0].elements[0].duration.value});
+          
+          
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      // const service = new google.maps.DistanceMatrixService();
+      // const origin = this.state.currentLoc;
+      // const destination = this.state.joinLocation;
+      // url = 'https://maps.googleapis.com/maps/api/distancematrix/json'
+      // key = GOOGLE_MAPS_API_KEY
+      // params = {'key': key, 'origins': [origin], 'destinations': [destination]}
+
+      // req = requests.get(url=url, params=params)
+      // res = json.loads(req.content)
+      //   console.log(res)
+
+      // const request = {
+      //   origins: [origin],
+      //   destinations: [destination],
+      //   travelMode: google.maps.TravelMode.BICYCLING,
+      //   unitSystem: google.maps.UnitSystem.METRIC,
+      //   avoidHighways: false,
+      //   avoidTolls: false,
+      // };
+      // // get distance matrix response
+      // service.getDistanceMatrix([origin], [destination], google.maps.TravelMode.BICYCLING, (res, error) => {
+      //   console.log(res)
+      //   // put response
+
+      // });
+    }
+  }
+
+  DisplayTime(){
+    
+    this.timer = setInterval(() => {
+      const time = this.state.time;
+      this.setState({ time : (time-3) })
+    },3000);
+  }
+
+
+  ShowHideTextComponentView = () => {
+
+    if (this.state.status == true) {
+      this.getTravelTime()
+
+
+    }
+    else {
+      this.setState({ status: true })
+      this.getTravelTime()
+    }
+  }
   async componentDidMount() {
 
     const { busId, routeId } = this.state;
 
     const onSuccess = ({ data }) => {
-      
+
       data = data.locations.map(({ latitude, longitude }) => ({ longitude: parseFloat(longitude), latitude: parseFloat(latitude) }));
       this.setState({
         start: data[0],
@@ -107,6 +193,11 @@ class ParentRide extends Component {
     console.log("marshal", marshalLocation);
     return (
       <View style={styles.container}>
+        <Button onPress={this.ShowHideTextComponentView} title="Show Iime" />
+
+        {this.state.status && <Text style={{ fontSize: 25, color: "#000", textAlign: 'center' }}> {Math.round(this.state.time) + "s"} </Text>}
+
+
         <View style={styles.container}>
           {/*Render our MapView*/}
           <MapView
@@ -161,9 +252,10 @@ class ParentRide extends Component {
                 size={20}
               />
             }
-            
+
           </MapView>
         </View>
+
       </View>
     );
   }

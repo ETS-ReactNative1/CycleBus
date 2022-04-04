@@ -14,6 +14,7 @@ from bus.models import Location
 
 from .models import Child
 from authentication.models import User
+import requests
 
 class ChildSerializer(serializers.ModelSerializer):
     
@@ -23,6 +24,7 @@ class ChildSerializer(serializers.ModelSerializer):
     join_location = LocationSerializer()
     parent = serializers.PrimaryKeyRelatedField(read_only=True)
     registered_buses = serializers.PrimaryKeyRelatedField(many=True,queryset=Bus.objects.all(), required=False)
+    join_location = serializers.CharField(max_length=128, required = False)
 
     class Meta:
         model =  Child
@@ -33,8 +35,22 @@ class ChildSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user_data= validated_data.pop('user')
         user = User.objects.create_user(**user_data)
+        
+        start_location = validated_data.pop('start_location')
+        start_obj = Location.objects.filter(eircode=start_location.get('eircode')).first()
+        if start_obj is None:
+            res = requests.get("https://maps.googleapis.com/maps/api/place/textsearch/json?query="+start_location.get('eircode')+"&key=AIzaSyCBiU4oYll98xI7IocNOONCCgvkJr3dTZA").json()
+            start_geo = res['results'][0]['geometry']['location']
+            start_obj = Location.objects.create(latitude = start_geo['lat'],longitude = start_geo['lng'],eircode=start_location.get('eircode'))
 
-        return Child.objects.create(user=user, **validated_data)
+        end_location = validated_data.pop('end_location')
+        end_obj = Location.objects.filter(eircode=end_location.get('eircode')).first()
+        if end_obj is None:
+            res = requests.get("https://maps.googleapis.com/maps/api/place/textsearch/json?query="+end_location.get('eircode')+"&key=AIzaSyCBiU4oYll98xI7IocNOONCCgvkJr3dTZA").json()
+            end_geo = res['results'][0]['geometry']['location']
+            end_obj = Location.objects.create(latitude = end_geo['lat'],longitude = end_geo['lng'],eircode=end_location.get('eircode'))
+
+        return Child.objects.create(user=user,start_location=start_obj, end_location = end_obj, **validated_data)
 
     def update(self, instance, validated_data):
         registered_buses = validated_data.pop('registered_buses', [])

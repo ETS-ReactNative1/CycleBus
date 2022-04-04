@@ -4,7 +4,7 @@ from django.utils import timezone
 
 
 class Location(models.Model):
-    location_id = models.IntegerField(primary_key=True)
+    location_id = models.AutoField(primary_key=True)
     location_type = models.CharField(max_length=128)
     location_name = models.CharField(max_length=128)
     latitude = models.CharField(max_length=128)
@@ -31,6 +31,7 @@ class Bus(models.Model):
     created_on = models.DateTimeField(default=timezone.now)
     last_updated = models.DateTimeField(blank=True, null=True)
 
+
     def publish(self):
         self.last_updated = timezone.now()
         self.save()
@@ -44,6 +45,7 @@ class Route(models.Model):
     route_id = models.AutoField(primary_key=True)
     route_name = models.CharField(max_length=100)
     bus = models.ForeignKey("Bus", verbose_name="bus", related_name="route_buses", on_delete=models.CASCADE)
+    is_default = models.BooleanField(default=False)
     locations = models.ManyToManyField(Location, through='RouteIndex',verbose_name="route_locations",related_name="route_locations")
     
     def __str__(self):

@@ -14,18 +14,33 @@ import Spinner from "react-native-loading-spinner-overlay";
 
 import APIKit, { setClientToken } from "../../shared/APIKit";
 
+import * as Animatable from 'react-native-animatable';
+//import LinearGradient from 'react-native-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Feather from 'react-native-vector-icons/Feather';
+import {
+
+  Platform,
+  StyleSheet,
+  StatusBar,
+  Alert
+} from 'react-native';
+
+
 const initialState = {
   username: "layani@email.com",
   password: "layani@123",
   errors: {},
   isAuthorized: false,
   isLoading: false,
+  secureTextEntry: true,
 };
 
 class Login extends Component {
   state = initialState;
 
-  componentWillUnmount() {}
+  componentWillUnmount() { }
 
   onUsernameChange = (username) => {
     this.setState({ username });
@@ -38,7 +53,7 @@ class Login extends Component {
   onPressSignUp = () => {
     this.props.navigation.push("Register")
   };
-  
+
   onPressLogin() {
     const { username, password } = this.state;
     const payload = { user: { email: username, password: password } };
@@ -46,6 +61,8 @@ class Login extends Component {
     const onSuccess = ({ data }) => {
       // Set JSON Web Token on success
       setClientToken(data.token);
+      this.props.navigation.navigate("DrawerParent")
+
       this.setState({ isLoading: false, isAuthorized: true });
 
     };
@@ -67,7 +84,7 @@ class Login extends Component {
     const { errors } = this.state;
     if (errors.non_field_errors) {
       message = (
-        <View style={styles.errorMessageContainerStyle}>
+        <View style={styles.actionError}>
           {errors.non_field_errors.map((item) => (
             <Text style={styles.errorMessageTextStyle} key={item}>
               {item}
@@ -79,13 +96,17 @@ class Login extends Component {
     return message;
   }
 
+  updateSecureTextEntry = () => {
+    this.setState({ secureTextEntry: !this.state.secureTextEntry });
+  }
+
   getErrorMessageByField(field) {
     // Checks for error message in specified field
     // Shows error message from backend
     let message = null;
     if (this.state.errors[field]) {
       message = (
-        <View style={styles.errorMessageContainerStyle}>
+        <View style={styles.actionError}>
           {this.state.errors[field].map((item) => (
             <Text style={styles.errorMessageTextStyle} key={item}>
               {item}
@@ -98,164 +119,218 @@ class Login extends Component {
   }
 
   render() {
-    const { isLoading } = this.state;
+    const { isLoading, errors } = this.state;
 
     return (
-      <View style={styles.containerStyle}>
+      <View style={styles.container}>
         <Spinner visible={isLoading} />
 
-        {!this.state.isAuthorized ? (
-          <View>
-            <View style={styles.logotypeContainer}>
-              <Image
-                source={require("../../assets/logo.png")}
-                style={styles.logotype}
-              />
-            </View>
+        <View style={styles.header}>
+          <Text style={styles.text_header}>Welcome!</Text>
+        </View>
+        <Animatable.View animation="fadeInUpBig" style={[styles.footer]}>
 
+          <Text style={styles.text_footer}>Email</Text>
+
+          <View style={styles.action}>
+
+            <FontAwesome name="envelope-o" color="blue" size={20} />
             <TextInput
-              style={styles.input}
+              style={styles.textInput}
               value={this.state.username}
               maxLength={256}
-              placeholder="Enter username..."
+              placeholder="Your Email"
               autoCapitalize="none"
               autoCorrect={false}
               returnKeyType="next"
-              onSubmitEditing={(event) =>
-                this.passwordInput.wrappedInstance.focus()
-              }
+              // onSubmitEditing={(event) =>
+              //   this.passwordInput.wrappedInstance.focus()
+              // }
+
               onChangeText={this.onUsernameChange}
               underlineColorAndroid="transparent"
               placeholderTextColor="#999"
             />
 
-            {this.getErrorMessageByField("username")}
+          </View>
 
+
+          <Text style={styles.text_footer}>Password</Text>
+          <View style={styles.action}>
+            <Feather name="lock" color="blue" size={20} />
             <TextInput
               ref={(node) => {
                 this.passwordInput = node;
               }}
-              style={styles.input}
+              style={styles.textInput}
               value={this.state.password}
               maxLength={40}
-              placeholder="Enter password..."
+              placeholder="Your Password"
               onChangeText={this.onPasswordChange}
               autoCapitalize="none"
               autoCorrect={false}
               returnKeyType="done"
               blurOnSubmit
               onSubmitEditing={this.onPressLogin.bind(this)}
-              secureTextEntry
+              secureTextEntry={this.state.secureTextEntry ? true : false}
               underlineColorAndroid="transparent"
               placeholderTextColor="#999"
             />
 
-            {this.getErrorMessageByField("password")}
-
-            {this.getNonFieldErrorMessage()}
-
             <TouchableOpacity
-              style={styles.loginButton}
+              onPress={this.updateSecureTextEntry}
+            >
+              {this.state.secureTextEntry ?
+                <Feather
+                  name="eye-off"
+                  color="grey"
+                  size={20}
+                />
+                :
+                <Feather
+                  name="eye"
+                  color="grey"
+                  size={20}
+                />
+              }
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity>
+            <Text style={styles.forgot_password}>Forgot password?</Text>
+          </TouchableOpacity>
+          
+          <View style={styles.button}>
+            {this.getErrorMessageByField("username")}
+            {this.getErrorMessageByField("password")}
+            {this.getNonFieldErrorMessage()}
+            <TouchableOpacity
+              style={styles.signIn}
               onPress={this.onPressLogin.bind(this)}
             >
-              <Text style={styles.loginButtonText}>LOGIN</Text>
+              <LinearGradient colors={['#1E90FF', '#1E90FF']} style={styles.signIn}>
+                <Text style={styles.textSign}>Sign In</Text>
+              </LinearGradient>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.signUpButton}
+              style={styles.signUP}
               onPress={this.onPressSignUp.bind(this)}
             >
-              <Text style={styles.signUpButtonText}>REGISTER</Text>
+              <Text style={styles.textSignUP}>Sign Up</Text>
             </TouchableOpacity>
 
           </View>
-        ) 
-         : (
-          this.props.navigation.navigate("DrawerParent")
-        )}
+
+        </Animatable.View>
       </View>
     );
   }
 }
 
-// Define some colors and default sane values
-const utils = {
-  colors: { primaryColor: "blue" },
-  dimensions: { defaultPadding: 12 },
-  fonts: { largeFontSize: 18, mediumFontSize: 16, smallFontSize: 12 },
-};
-
-// Define styles here
-const styles = {
-  innerContainer: {
-    marginBottom: 32,
-  },
-  logotypeContainer: {
-    alignItems: "center",
-  },
-  logotype: {
-    maxWidth: 280,
-    maxHeight: 100,
-    resizeMode: "contain",
-    alignItems: "center",
-  },
-  containerStyle: {
+const styles = StyleSheet.create({
+  container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#f6f6f6",
+    backgroundColor: '#1E90FF'
   },
-  input: {
-    height: 50,
-    padding: 12,
-    backgroundColor: "white",
-    borderRadius: 6,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    marginBottom: utils.dimensions.defaultPadding,
+  header: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingHorizontal: 20,
+    paddingBottom: 50
   },
-  loginButton: {
-    borderColor: utils.colors.primaryColor,
-    borderWidth: 2,
-    padding: utils.dimensions.defaultPadding,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 6,
+  footer: {
+    flex: 3,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingHorizontal: 20,
+    paddingVertical: 30
   },
-  loginButtonText: {
-    color: utils.colors.primaryColor,
-    fontSize: utils.fonts.mediumFontSize,
-    fontWeight: "bold",
+  text_header: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 30
   },
-  signUpButton: {
-    borderColor: utils.colors.primaryColor,
-    borderWidth: 2,
-    padding: utils.dimensions.defaultPadding,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 6,
+  text_footer: {
+    color: { primaryColor: "blue" },
+    marginTop: 35,
+    fontSize: 18
   },
-  signUpButtonText: {
-    color: utils.colors.primaryColor,
-    fontSize: utils.fonts.mediumFontSize,
-    fontWeight: "bold",
+  forgot_password: {
+    color: '#1E90FF',
+    marginTop: 15
   },
-  errorMessageContainerStyle: {
-    marginBottom: 8,
+  action: {
+    flexDirection: 'row',
+    marginTop: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f2f2f2',
+    paddingBottom: 5
+  },
+  actionError: {
+    flexDirection: 'row',
+    paddingBottom: 5,
+    marginBottom: 4,
     backgroundColor: "#fee8e6",
     padding: 8,
     borderRadius: 4,
+  },
+  textInput: {
+    flex: 1,
+    marginTop: Platform.OS === 'ios' ? 0 : -12,
+    paddingLeft: 10,
+    color: '#05375a',
+    //color: utils.colors
+  },
+  errorMsg: {
+    color: '#FF0000',
+    fontSize: 14,
+  },
+  button: {
+    alignItems: 'center',
+    marginTop: 30,
+    color: '#1E90FF',
+  },
+  signIn: {
+    width: '100%',
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+    color: '#1E90FF',
   },
   errorMessageTextStyle: {
     color: "#db2828",
     textAlign: "center",
     fontSize: 12,
   },
-};
+  errorMessageContainerStyle: {
+    //marginBottom: 4,
+    backgroundColor: "#fee8e6",
+    //padding: 8,
+    //borderRadius: 4,
+  },
+  signUP: {
+    borderColor: '#1E90FF',
+    borderWidth: 1,
+    marginTop: 15,
+    width: '100%',
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+  },
+  textSignUP: {
+    color: '#1E90FF',
+    fontSize: 18,
+    fontWeight: 'bold'
+  },
+  textSign: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  }
+});
 
 export default Login;

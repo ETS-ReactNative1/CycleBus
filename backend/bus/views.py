@@ -116,3 +116,13 @@ class MartialChildAPIView(APIView):
         serializer = self.serializer_class(children, many=True)
         return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
             
+class MarshalBusAPIView(APIView):
+    
+    serializer_class =BusSerializer
+
+    def get(self, request, id=None):
+
+        current_user = request.user
+        bus_list = Bus.objects.filter(default_marshal_id=current_user.id)
+        serializer = BusSerializer(bus_list, many=True)
+        return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)

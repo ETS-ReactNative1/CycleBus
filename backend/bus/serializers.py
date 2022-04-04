@@ -8,18 +8,17 @@ from .models import Bus, Location, Route, RouteIndex, Ride
 
 class LocationSerializer(serializers.ModelSerializer):
     
-    longitude = serializers.CharField(
-        max_length=128,
-        required=True
-    )
-    latitude = serializers.CharField(
-        max_length=128,
-        required=True
-    )
+    longitude = serializers.CharField(max_length=128,required=False)
+    latitude = serializers.CharField(max_length=128, required = False)
+    location_id = serializers.CharField(max_length=128, required = False)
+    location_type = serializers.CharField(max_length=128, required = False)
+    location_name = serializers.CharField(max_length=128, required = False)
+    eircode = serializers.CharField(max_length=128, required = False)
+    
 
     class Meta:
         model = Location
-        fields = ['location_id','location_type', 'location_name', 'longitude', 'latitude']
+        fields = ['location_id','location_type', 'location_name', 'longitude', 'latitude','eircode']
 
     def create(self, validated_data):
         return Location.objects.create(**validated_data)
@@ -68,10 +67,11 @@ class BusSerializer(serializers.ModelSerializer):
     county = serializers.CharField(max_length=128,required=True)
     area = serializers.CharField(max_length=128,required=True)
     routes = serializers.SerializerMethodField()
+    default_route = serializers.SerializerMethodField()
 
     class Meta:
         model = Bus
-        fields = ['bus_id','bus_name', 'county', 'area','routes']
+        fields = ['bus_id','bus_name', 'county', 'area','routes', 'default_route']
 
     def create(self, validated_data):
         return Bus.objects.create(**validated_data)
@@ -80,6 +80,13 @@ class BusSerializer(serializers.ModelSerializer):
         q = Route.objects.filter(bus=instance)
         serializer = RouteViewSerializer(q, many=True)
         return serializer.data
+
+    def get_default_route(self, instance):
+        default_route=instance.route_buses.filter(is_default=True).first()
+        if  default_route:
+            
+            return default_route.route_id
+
 
 class RideSerializer(serializers.ModelSerializer):
 

@@ -32,7 +32,7 @@ const initialState = {
   secureTextEntry: true,
 };
 
-class ChildRegister extends Component {
+class EditProfile extends Component {
   state = initialState;
 
   componentWillUnmount() { }
@@ -493,4 +493,4 @@ const styles = {
   },
 };
 
-export default ChildRegister;
+export default EditProfile;

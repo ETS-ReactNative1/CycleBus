@@ -32,10 +32,8 @@ class MarshalRide extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      //busId:props.route.params.busId,
-      //routeId:props.route.params.routeId,
-      busId: 3,
-      routeId: 2,
+      busId:props.route.params.busId,
+      routeId:props.route.params.routeId,
       modalItem: null,
       rideId: null,
       count: 0,

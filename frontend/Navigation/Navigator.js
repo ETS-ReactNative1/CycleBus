@@ -2,7 +2,8 @@ import 'react-native-gesture-handler';
 import React, { useState, useEffect, } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Home from "../Views/Home/HomeView";
-import MarshalRide from "../Views/Ride/MarshalRideView";
+import MarshalBus from "../Views/Marshal/MarshalBusView";
+import Profile from '../Views/Profile/ProfileView';
 
 
 const Stack = createNativeStackNavigator();
@@ -22,9 +23,17 @@ const ParentStackNavigator = () => {
 const MarshalStackNavigator = () => {
   return (
     <Stack.Navigator screenOptions={screenOptionStyle}>
-      <Stack.Screen name="MarshalRide" component={MarshalRide} />
+      <Stack.Screen name="MarshalBus" component={MarshalBus} />
     </Stack.Navigator>
   );
 }
 
-export { MarshalStackNavigator,ParentStackNavigator };
+const ProfileStackNavigator = () => {
+  return (
+    <Stack.Navigator screenOptions={screenOptionStyle}>
+      <Stack.Screen name="Profile" component={Profile}  />
+    </Stack.Navigator>
+  );
+}
+
+export { MarshalStackNavigator,ParentStackNavigator ,ProfileStackNavigator};
