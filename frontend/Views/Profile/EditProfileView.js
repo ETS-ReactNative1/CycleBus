@@ -8,7 +8,7 @@
 // <ROOT>/App/Views/Login/LoginView.js
 
 import React, { Component } from "react";
-import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
+import { View, Text, TouchableOpacity, Image, TextInput, ScrollView } from "react-native";
 
 import Spinner from "react-native-loading-spinner-overlay";
 
@@ -20,83 +20,61 @@ import Feather from 'react-native-vector-icons/Feather';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const initialState = {
-  childName: "",
-  childUsername: "",
-  childEmail: "",
-  childPassword: "",
-  childPassword2: "",
-  childStartLocation: "",
-  childEndLocation: "",
+  telephone_no1: "",
+  telephone_no2: "",
+  address: "",
+  name: "",
+  email: "",
+  userId: "",
   errors: {},
   isLoading: false,
-  secureTextEntry: true,
+
 };
 
 class EditProfile extends Component {
   state = initialState;
 
-  componentWillUnmount() { }
-
-  onNameChange = (childName) => {
-    this.setState({ childName });
-  };
-
-  onEmailChange = (childEmail) => {
-    this.setState({ childEmail });
-  };
-
-  onStartLocationChange = (childStartLocation) => {
-    this.setState({ childStartLocation });
-  };
-
-  onEndLocationChange = (childEndLocation) => {
-    this.setState({ childEndLocation });
-  };
-
-  onUsernameChange = (childUsername) => {
-    this.setState({ childUsername });
-  };
-
-  onPasswordChange = (childPassword) => {
-    this.setState({ childPassword });
-  };
-
-  onPassword2Change = (childPassword2) => {
-    this.setState({ childPassword2 });
-  };
-
-  onPressSkip() {
-    this.props.navigation.navigate("Login")
+  constructor(props) {
+    super(props)
+    this.state = {
+      userId: props.route.params.userID,
+      name: props.route.params.userName,
+      email: props.route.params.userEmail,
+      address: props.route.params.userAddress,
+      telephone_no1: props.route.params.telephoneNo1,
+      telephone_no2: props.route.params.telephoneNo2
+    };
   }
 
-  // onPressAdd() {
-  //   //this.state = initialState
-  //   this.setState(initialState)
-  // }
+  componentWillUnmount() { }
 
+  onNameChange = (name) => {
+    this.setState({ name });
+  };
 
-  onPressRegister() {
-    const { childName, childEmail, childStartLocation, childEndLocation, childUsername, childPassword, childPassword2 } = this.state;
-    const payload = {
-      child: {
-        user: {
-          name: childName,
-          email: childEmail,
-          username: childUsername,
-          password: childPassword,
-          password2: childPassword2
-        },
-        start_location: childStartLocation,
-        end_location: childEndLocation
-      }
-    };
+  onEmailChange = (email) => {
+    this.setState({ email });
+  };
 
-    
+  onTelephone_no1Change = (telephone_no1) => {
+    this.setState({ telephone_no1 });
+  };
+
+  onTelephone_no2Change = (telephone_no2) => {
+    this.setState({ telephone_no2 });
+  };
+
+  onAddressChange = (address) => {
+    this.setState({ address });
+  };
+
+  onPressSubmit() {
+    const { userId, address, telephone_no1, telephone_no2 } = this.state;
+    const payload = { profile: { address: address, telephone_no1: telephone_no1, telephone_no2: telephone_no2 } };
+
     const onSuccess = ({ data }) => {
-      //this.setState({ isLoading: false });
-      this.setState(initialState);
-      //this.props.navigation.navigate("Login")
-      console.log(data);
+      this.setState({ isLoading: false });
+      this.props.navigation.push("Profile")
     };
 
     const onFailure = (error) => {
@@ -106,7 +84,8 @@ class EditProfile extends Component {
     // Show spinner when call is made
     this.setState({ isLoading: true });
 
-    APIKit.post("child/", payload).then(onSuccess).catch(onFailure);
+    APIKit.put("profile/" + userId + '/', payload).then(onSuccess).catch(onFailure);
+    console.log(payload);
   }
 
   getNonFieldErrorMessage() {
@@ -144,262 +123,142 @@ class EditProfile extends Component {
     return message;
   }
 
-  updateSecureTextEntry = () => {
-    this.setState({ secureTextEntry: !this.state.secureTextEntry });
-  }
 
   render() {
     const { isLoading } = this.state;
 
     return (
-      <View style={styles.container}>
-        <Spinner visible={isLoading} />
-        <View style={styles.header}>
-          <Text style={styles.text_header}>Register Child</Text>
-        </View>
-        <Animatable.View animation="fadeInUpBig" style={styles.footer}>
+      <View>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={styles.container}>
 
-          <Text style={styles.text_footer}>Name</Text>
-
-          <View style={styles.action}>
-
-            <FontAwesome name="user-o" color="blue" size={20} />
-
-
-            <TextInput
-              style={styles.textInput}
-              value={this.state.childName}
-              maxLength={256}
-              placeholder="Enter child's name..."
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="next"
-              onChangeText={this.onNameChange}
-              underlineColorAndroid="transparent"
-              placeholderTextColor="#999"
-            />
-
-            {this.getErrorMessageByField("name")}
-          </View>
-          <Text style={styles.text_footer}>Email</Text>
-
-          <View style={styles.action}>
-
-            <FontAwesome name="envelope-o" color="blue" size={20} />
-            <TextInput
-              style={styles.textInput}
-              value={this.state.childEmail}
-              maxLength={256}
-              placeholder="Enter child's email..."
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="next"
-              onChangeText={this.onEmailChange}
-              underlineColorAndroid="transparent"
-              placeholderTextColor="#999"
-            />
-
-            {this.getErrorMessageByField("email")}
-          </View>
-          <Text style={styles.text_footer}>Home</Text>
-
-          <View style={styles.action}>
-
-            <FontAwesome name="home" color="blue" size={20} />
-            <TextInput
-              style={styles.textInput}
-              value={this.state.childStartLocation}
-              maxLength={256}
-              placeholder="Enter home eircode..."
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="next"
-              onChangeText={this.onStartLocationChange}
-              underlineColorAndroid="transparent"
-              placeholderTextColor="#999"
-            />
-
-            {this.getErrorMessageByField("childStartLocation")}
-          </View>
-          <Text style={styles.text_footer}>End Location</Text>
-
-          <View style={styles.action}>
-
-            <FontAwesome name="building-o" color="blue" size={20} />
-            <TextInput
-              style={styles.textInput}
-              value={this.state.childEndLocation}
-              maxLength={256}
-              placeholder="Enter school eircode..."
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="next"
-              onChangeText={this.onEndLocationChange}
-              underlineColorAndroid="transparent"
-              placeholderTextColor="#999"
-            />
-
-            {this.getErrorMessageByField("childEndLocation")}
-          </View>
-          <Text style={styles.text_footer}>Username</Text>
-
-          <View style={styles.action}>
-
-            <FontAwesome name="user-o" color="blue" size={20} />
-            <TextInput
-              style={styles.textInput}
-              value={this.state.childUsername}
-              maxLength={256}
-              placeholder="Enter child's username..."
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="next"
-              onChangeText={this.onUsernameChange}
-              underlineColorAndroid="transparent"
-              placeholderTextColor="#999"
-            />
-
-            {this.getErrorMessageByField("username")}
-          </View>
-          <Text style={styles.text_footer}>Password</Text>
-
-          <View style={styles.action}>
-
-            <FontAwesome name="lock" color="blue" size={20} />
-            <TextInput
-              ref={(node) => {
-                this.passwordInput = node;
-              }}
-              style={styles.textInput}
-              value={this.state.childPassword}
-              maxLength={40}
-              placeholder="Enter child's password..."
-              onChangeText={this.onPasswordChange}
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="done"
-              blurOnSubmit
-              onSubmitEditing={this.onPressRegister.bind(this)}
-              secureTextEntry={this.state.secureTextEntry ? true : false}
-              underlineColorAndroid="transparent"
-              placeholderTextColor="#999"
-            />
-            <TouchableOpacity
-              onPress={this.updateSecureTextEntry}
-            >
-              {this.state.secureTextEntry ?
-                <Feather
-                  name="eye-off"
-                  color="grey"
-                  size={20}
-                />
-                :
-                <Feather
-                  name="eye"
-                  color="grey"
-                  size={20}
-                />
-              }
-            </TouchableOpacity>
-            {this.getErrorMessageByField("password")}
-
-            {this.getNonFieldErrorMessage()}
-          </View>
-          <Text style={styles.text_footer}>Confirm Password</Text>
-
-          <View style={styles.action}>
-
-            <FontAwesome name="lock" color="blue" size={20} />
-            <TextInput
-              ref={(node) => {
-                this.password2Input = node;
-              }}
-              style={styles.textInput}
-              value={this.state.childPassword2}
-              maxLength={40}
-              placeholder="Reenter password..."
-              onChangeText={this.onPassword2Change}
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="done"
-              blurOnSubmit
-              onSubmitEditing={this.onPressRegister.bind(this)}
-              secureTextEntry={this.state.secureTextEntry ? true : false}
-              underlineColorAndroid="transparent"
-              placeholderTextColor="#999"
-            />
-            <TouchableOpacity
-              onPress={this.updateSecureTextEntry}
-            >
-              {this.state.secureTextEntry ?
-                <Feather
-                  name="eye-off"
-                  color="grey"
-                  size={20}
-                />
-                :
-                <Feather
-                  name="eye"
-                  color="grey"
-                  size={20}
-                />
-              }
-            </TouchableOpacity>
-            {this.getErrorMessageByField("childPassword2")}
-
-            {this.getNonFieldErrorMessage()}
+            <View style={styles.header}>
+              <Text style={styles.text_header}>Edit Profile</Text>
+            </View>
           </View>
 
-          <View style={styles.button}>
-            <TouchableOpacity
-              style={styles.signUp}
-              onPress={this.onPressRegister.bind(this)}
-            >
-              <LinearGradient colors={['#1E90FF', '#1E90FF']} style={styles.signUp}>
-                <Text style={styles.textSign}>Register </Text>
-              </LinearGradient>
-            </TouchableOpacity>
+          <View style={[styles.footer]}>
+            <Text style={styles.text_footer}>Name</Text>
 
-            {/* <TouchableOpacity
-              style={styles.signUp}
-              onPress={this.onPressAdd.bind(this)}
-            >
-              <LinearGradient colors={['#1E90FF', '#1E90FF']} style={styles.signUp}>
-                <Text style={styles.textSign}>Add New Child</Text>
-              </LinearGradient>
-            </TouchableOpacity> */}
+            <View style={styles.action}>
 
-            <TouchableOpacity
-              style={styles.signUp}
-              onPress={this.onPressSkip.bind(this)}
-            >
-              <LinearGradient colors={['#1E90FF', '#1E90FF']} style={styles.signUp}>
-                <Text style={styles.textSign}>Done</Text>
-              </LinearGradient>
-            </TouchableOpacity>
+              <FontAwesome name="user-o" color="blue" size={20} />
+
+              <TextInput
+                style={styles.textInput}
+                value={this.state.name}
+                maxLength={256}
+                placeholder="Enter name..."
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="next"
+                onChangeText={this.onNameChange}
+                underlineColorAndroid="transparent"
+                placeholderTextColor="#999"
+                editable = {false}
+              />
+
+              {/* {this.getErrorMessageByField("name")} */}
+            </View>
+
+            <Text style={styles.text_footer}>Email</Text>
+
+            <View style={styles.action}>
+
+              <FontAwesome name="envelope-o" color="blue" size={20} />
+              <TextInput
+                style={styles.textInput}
+                value={this.state.email}
+                maxLength={256}
+                placeholder="Enter email..."
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="next"
+                onChangeText={this.onEmailChange}
+                underlineColorAndroid="transparent"
+                placeholderTextColor="#999"
+                editable = {false}
+              />
+
+              {/* {this.getErrorMessageByField("email")} */}
+            </View>
+
+            <Text style={styles.text_footer}>Address</Text>
+
+            <View style={styles.action}>
+
+              <FontAwesome name="home" color="blue" size={20} />
+              <TextInput
+                style={styles.textInput}
+                value={this.state.address}
+                maxLength={256}
+                placeholder="Enter address..."
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="next"
+                onChangeText={this.onAddressChange}
+                underlineColorAndroid="transparent"
+                placeholderTextColor="#999"
+              />
+
+              {/* {this.getErrorMessageByField("address")} */}
+            </View>
+
+            <Text style={styles.text_footer}>Primary Telephone Number</Text>
+
+            <View style={styles.action}>
+
+              <FontAwesome name="phone" color="blue" size={20} />
+              <TextInput
+                style={styles.textInput}
+                value={this.state.telephone_no1}
+                maxLength={256}
+                placeholder="Enter telephone number..."
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="next"
+                onChangeText={this.onTelephone_no1Change}
+                underlineColorAndroid="transparent"
+                placeholderTextColor="#999"
+              />
+
+              {/* {this.getErrorMessageByField("telephone_no1")} */}
+            </View>
+
+            <Text style={styles.text_footer}>Secondary Telephone Number</Text>
+
+            <View style={styles.action}>
+
+              <FontAwesome name="phone" color="blue" size={20} />
+              <TextInput
+                style={styles.textInput}
+                value={this.state.telephone_no2}
+                maxLength={256}
+                placeholder="Enter telephone number..."
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="next"
+                onChangeText={this.onTelephone_no2Change}
+                underlineColorAndroid="transparent"
+                placeholderTextColor="#999"
+              />
+
+              {/* {this.getErrorMessageByField("telephone_no2")} */}
+            </View>
+
+            <View style={styles.button}>
+              <TouchableOpacity
+                style={styles.signUp}
+                onPress={this.onPressSubmit.bind(this)}
+              >
+                <LinearGradient colors={['#1E90FF', '#1E90FF']} style={styles.signUp}>
+                  <Text style={styles.textSign}>Submit </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+
+            </View>
           </View>
-          {/* 
-          <TouchableOpacity
-            style={styles.registerButton}
-            onPress={this.onPressRegister.bind(this)}
-          >
-            <Text style={styles.registerButtonText}>Register Child</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.registerButton}
-            onPress={this.onPressAdd.bind(this)}
-          >
-            <Text style={styles.registerButtonText}>Add New Child</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.registerButton}
-            onPress={this.onPressSkip.bind(this)}
-          >
-            <Text style={styles.registerButtonText}>DONE</Text>
-          </TouchableOpacity> */}
-        </Animatable.View>
+        </ScrollView>
       </View>
     );
   }
@@ -414,7 +273,7 @@ const styles = {
 
   text_footer: {
     color: { primaryColor: "blue" },
-    marginTop: 15,
+    marginTop: 30,
     fontSize: 18
   },
 
@@ -424,12 +283,12 @@ const styles = {
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 25,
   },
 
   action: {
     flexDirection: 'row',
-    marginTop: 10,
+    marginTop: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#f2f2f2',
     paddingBottom: 5
@@ -444,7 +303,7 @@ const styles = {
 
   button: {
     alignItems: 'center',
-    marginTop: 30,
+    marginTop: 60,
     color: '#1E90FF',
   },
 
@@ -483,7 +342,7 @@ const styles = {
     justifyContent: 'flex-end',
     paddingHorizontal: 20,
     paddingBottom: 20,
-    marginTop :10
+    marginTop: 100
   },
 
   text_header: {

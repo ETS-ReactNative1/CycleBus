@@ -16,10 +16,15 @@ import { Marker } from "react-native-maps";
 import * as Permissions from "expo-permissions";
 import * as Location from "expo-location";
 import { StyleSheet } from "react-native";
+import GeoMarker from "../Ride/Marker";
 
 const initialState = {
     geoPoints: [],
     isLoading: false,
+    start: null,
+    waypoints: [],
+    end: null,
+    home:null
 };
 
 const galway = {
@@ -32,20 +37,21 @@ const galway = {
 class RouteMap extends Component {
     state = initialState;
 
-    constructor(props) {
-        super(props)
-        data = props.route.params.geoPoints.map(({ longitude, latitude }) => ({ longitude: parseFloat(longitude), latitude: parseFloat(latitude) }));
-        this.state = {
-            start: data[0],
-            waypoints: data.slice(1, -1),
-            end:data[data.length - 1]
-        };
+    componentDidMount() {
+        this.setGeoPoints(this.props.geoPoints,this.props.home)
+    }
 
-        console.log(data)
+    setGeoPoints = (geoPoints,home) => {
+        this.setState({
+            home: home,
+            start: geoPoints[0],
+            waypoints: geoPoints.slice(1, -1),
+            end: geoPoints[geoPoints.length - 1]
+        });
     }
 
     render() {
-        const { isLoading, start, waypoints,end } = this.state;
+        const { isLoading, start, waypoints, end } = this.state;
 
         return (
             <View style={styles.container}>
@@ -56,31 +62,47 @@ class RouteMap extends Component {
                         initialRegion={galway}
 
                     >
-                        <MapViewDirections
-                           origin = {start}
-                           destination= {end}
-                            waypoints={waypoints}
-                            lineDashPattern={[0]}
+                        {start && end && waypoints && <MapViewDirections
+                            origin={{ longitude: parseFloat(start.longitude), latitude: parseFloat(start.latitude) }}
+                            destination={{ longitude: parseFloat(end.longitude), latitude: parseFloat(end.latitude) }}
+                            waypoints={waypoints.map(({ longitude, latitude }) => ({ longitude: parseFloat(longitude), latitude: parseFloat(latitude) }))}
+                            lineDashPattern={[1]}
                             apikey="AIzaSyCBiU4oYll98xI7IocNOONCCgvkJr3dTZA"
-                            strokeWidth={4}
+                            strokeWidth={2}
                             strokeColor="#111111"
                             mode="BICYCLING"
-                            optimizeWaypoints = {false}
-                            
-                        />
-                        <Marker coordinate={start} />
-                        <Marker coordinate={end} />
+                            optimizeWaypoints={false}
+                        />}
+                        {start && <GeoMarker
+                            coords={{ longitude: start.longitude, latitude: start.latitude }}
+                            icon="chevron-circle-down"
+                            onClick={this.props.onMarkerClick}
+                            color="red"
+                            location_id={start.location_id}
+                            size={20}
+                        />}
+                        {end && <GeoMarker
+                            coords={{ longitude: end.longitude, latitude: end.latitude }}
+                            icon="chevron-circle-down"
+                            onClick={this.props.onMarkerClick}
+                            color="red"
+                            location_id={end.location_id}
+                            size={20}
+                        />}
 
-                        {waypoints.map((marker,i) => (
-                            <MapView.Marker 
-                            pinColor={'green'}
-                            
-                            coordinate={marker}
-                            title={i.toString()}
-                            key={i}>
-                            </MapView.Marker>
-                        ))}
-                        
+                        {waypoints && waypoints.map((point, key) => {
+                            return <GeoMarker
+                                key={key}
+                                coords={{ longitude: point.longitude, latitude: point.latitude }}
+                                icon="chevron-circle-down"
+                                name={point.location_name}
+                                onClick={this.props.onMarkerClick}
+                                location_id={point.location_id}
+                                color="blue"
+                                size={15}
+                            />
+                        })}
+
                         {/* <Polyline
                             coordinates={geoPoints}
                             strokeColor="#000"

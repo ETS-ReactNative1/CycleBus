@@ -2,11 +2,14 @@ import React, { Component } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
+  TouchableWithoutFeedback,
   Modal,
   TextInput,
   Button,
   FlatList,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
 } from "react-native";
 
 import APIKit from '../../shared/APIKit';
@@ -16,6 +19,8 @@ import { StyleSheet } from "react-native";
 import GeoMarker from "./Marker";
 import MapView from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
+import { INCIDENTS } from "../Common/Incidents";
+import { Picker } from "@react-native-picker/picker";
 
 const galway = {
   latitude: 53.270962,
@@ -24,36 +29,31 @@ const galway = {
   longitudeDelta: 0.0421,
 };
 
-const maxDistanceInKM = 0.1; // 100m distance
-
-
 class MarshalRide extends Component {
 
   constructor(props) {
     super(props)
     this.state = {
-      busId:props.route.params.busId,
-      routeId:props.route.params.routeId,
-      modalItem: null,
-      rideId: null,
+      busId: props.route.params.busId,
+      routeId: props.route.params.routeId,
+      rideId: -1,
       count: 0,
       isStarted: false,
       isModalVisible: false,
       children: [],
       routeLocations: [],
+      currentPoint: null,
       currentLoc: null,
-      passedLoc: 0,
       start: null,
       waypoints: null,
       end: null,
-      action: null,
-
+      incident: INCIDENTS[0],
     };
 
   }
 
 
-  async onButtonClick() {
+  async onStart() {
     const { busId, routeId } = this.state;
 
     const payload = { ride: { weather: "Sunny", wind_speed: 23.5, bus: busId, route: routeId } };
@@ -73,6 +73,7 @@ class MarshalRide extends Component {
 
     };
 
+
     const onFailure = (error) => {
       console.log(error);
       this.setState({ errors: error, isLoading: false });
@@ -82,11 +83,23 @@ class MarshalRide extends Component {
 
   }
 
+
+  onIncident() {
+    const {incident} = this.state
+    console.log(incident);
+    this.ws.send(
+      JSON.stringify(
+        {
+          type: 'ins',
+          data: incident
+        }
+      )
+    )
+  }
+
   toggleModal() {
     this.setState({ isModalVisible: !this.state.isModalVisible })
   }
-
-
 
   async componentDidMount() {
 
@@ -94,18 +107,13 @@ class MarshalRide extends Component {
 
     const onSuccess = ({ data }) => {
 
-      filtered_data = data.locations.filter((x) =>
-        x.location_name !== ""
-      )
-
       this.setState({
-        start: filtered_data[0],
-        waypoints: filtered_data.slice(1, -1),
-        end: filtered_data[filtered_data.length - 1],
+        start: data.locations[0],
+        waypoints: data.locations.slice(1, -1),
+        end: data.locations[data.locations.length - 1],
         isLoading: false
       });
     };
-
     const onFailure = (error) => {
       this.setState({ errors: error.response.data, isLoading: false });
     };
@@ -133,7 +141,6 @@ class MarshalRide extends Component {
 
 
   async getGeoLoc() {
-
     this.timer = setInterval(() => {
       if (this.state.isStarted) {
         try {
@@ -141,7 +148,14 @@ class MarshalRide extends Component {
 
           Location.getCurrentPositionAsync({}).then((location) => {
             if (location) {
-              this.ws.send(location.coords.latitude + ',' + location.coords.longitude);
+              this.ws.send(
+                JSON.stringify(
+                  {
+                    type: 'loc',
+                    data: location.coords.latitude + ',' + location.coords.longitude
+                  }
+                )
+              )
               this.setState({
                 currentLoc: location.coords,
               });
@@ -158,67 +172,45 @@ class MarshalRide extends Component {
     }, 3000);
   }
 
-  distanceInKM(point1, point2) {
-    var lat1 = point1.latitude;
-    var lon1 = point1.longitude;
-    var lat2 = point2.latitude;
-    var lon2 = point2.longitude;
+  async getFencedWayPoint(current) {
+    const { count, waypoints } = this.state
+    const init = Math.max(count - 2, 0)
+    for (let i = init; i < waypoints.length; i++) {
+      point1 = current
+      point2 = waypoints[i].location
+      var lat1 = point1.latitude;
+      var lon1 = point1.longitude;
+      var lat2 = point2.latitude;
+      var lon2 = point2.longitude;
 
-    var p = 0.017453292519943295;
-    var c = Math.cos;
-    var a = 0.5 - c((lat2 - lat1) * p) / 2 +
-      c(lat1 * p) * c(lat2 * p) *
-      (1 - c((lon2 - lon1) * p)) / 2;
+      var p = 0.017453292519943295;
+      var c = Math.cos;
+      var a = 0.5 - c((lat2 - lat1) * p) / 2 +
+        c(lat1 * p) * c(lat2 * p) *
+        (1 - c((lon2 - lon1) * p)) / 2;
 
-    return 12742 * Math.asin(Math.sqrt(a));
+      const dist = 12742 * Math.asin(Math.sqrt(a));
+      if (dist < 0.1) {
+        this.setState({ count: i });
+        return waypoints[i]
+      }
+    }
+    return null
   }
 
-  getByProximity(currentLoc) {
+  async getByProximity(currentLoc) {
 
     const { count, waypoints, end } = this.state;
-
-    console.log("count", count , "waypoints", waypoints.length);
-
-    if (count < waypoints.length) {
-
-      var distance = this.distanceInKM(waypoints[count], currentLoc)
-      if (distance < maxDistanceInKM) {
-
-        if (!this.state.isModalVisible) {
-          
-          this.onMarkerClick(waypoints[count].location_id);
-          this.setState({
-            count: count + 1,
-          });
-
-        }
+    var fencedpoint = await this.getFencedWayPoint(currentLoc)
+    if (fencedpoint != null) {
+      if (fencedpoint.is_join_location && waypoints[count].location.location_id !== fencedpoint.location.location_id) {
+        this.onMarkerClick(fencedpoint.location.location_id);
       }
-      if ((distance > maxDistanceInKM) && (this.state.isModalVisible)) {
-
+      if (count == waypoints.length) {
         this.onModalClose();
-      }
-
-    }
-
-    else{
-      this.onModalClose();
-      var distance = this.distanceInKM(end, currentLoc);
-      console.log(distance);
-
-      if (distance < 0.05)  {
-        
-        
         this.endRide();
       }
     }
-
-    // if((currentLoc == this.state.end.coords) && (distance < maxDistanceInKM)){
-    //   this.setState({
-    //     action : "ended"
-    //   })
-    //   this.onMarkerClick(this.state.waypoints[count].location_id);
-    // }
-
 
   }
 
@@ -226,27 +218,51 @@ class MarshalRide extends Component {
     this.props.navigation.navigate("MarshalRide");
   }
 
-  onMarkerClick = (location_id) => {
-    const { busId } = this.state;
-
-
+  onMarkerClick = async (location_id) => {
+    const { routeId, rideId } = this.state;
     const onSuccess = ({ data }) => {
-
-      this.setState({ children: data.data, isLoading: false });
+      this.setState({ children: data.data, isLoading: false, currentPoint: location_id });
+      this.setState({ isModalVisible: true });
     };
 
     const onFailure = (error) => {
       this.setState({ errors: error, isLoading: false });
     };
 
-    APIKit.get("bus/" + busId + "/children/?start=" + location_id).then(onSuccess).catch(onFailure);
-    this.setState({ isModalVisible: true });
+    APIKit.get("route/" + routeId + "/children/" + location_id + "/?ride=" + rideId).then(onSuccess).catch(onFailure);
 
   }
 
 
-  onModalClose = () => {
-    this.setState({ isModalVisible: false });
+  onJoined = async () => {
+    const { children, rideId, currentLoc, currentPoint } = this.state;
+    // this.setState({ isStarted: false })
+    const payload = children.filter(
+      (child) => { return child.isSelected }
+    ).map((child) => {
+      return {
+        join_location: currentPoint,
+        join_geo: currentLoc?.longitude + ',' + currentLoc?.latitude,
+        status: "Joined",
+        attendee: child.child.id
+      }
+    });
+
+    const onSuccess = ({ data }) => {
+      this.onModalClose();
+    };
+
+    const onFailure = (error) => {
+      console.log(error)
+      this.setState({ errors: error, isLoading: false });
+    };
+
+    APIKit.put("ride/" + rideId + "/attendence/", { attendence: payload }).then(onSuccess).catch(onFailure);
+
+  }
+
+  onModalClose = async () => {
+    this.setState({ isModalVisible: false, children: [] });
   }
 
 
@@ -255,7 +271,7 @@ class MarshalRide extends Component {
     child.isSelected = child.isSelected ? false : true;
 
     const index = this.state.children.findIndex(
-      item => child.user.id === item.user.id
+      item => child.child.id === item.child.id
     );
 
     this.state.children[index] = child;
@@ -269,20 +285,19 @@ class MarshalRide extends Component {
 
   render() {
 
-    const { end, start, waypoints, currentLoc } = this.state;
+    const { end, start, waypoints, currentLoc, rideId, incident } = this.state;
 
     return (
       <View style={styles.container}>
-        {!this.state.isStarted && <Button onPress={this.onButtonClick.bind(this)} title="Start" />}
         <View style={styles.container}>
           <MapView
             style={styles.map}
             initialRegion={galway}
           >
             {start && end && waypoints && <MapViewDirections
-              origin={{ longitude: parseFloat(start.longitude), latitude: parseFloat(start.latitude) }}
-              destination={{ longitude: parseFloat(end.longitude), latitude: parseFloat(end.latitude) }}
-              waypoints={waypoints.map(({ longitude, latitude }) => ({ longitude: parseFloat(longitude), latitude: parseFloat(latitude) }))}
+              origin={{ longitude: parseFloat(start.location.longitude), latitude: parseFloat(start.location.latitude) }}
+              destination={{ longitude: parseFloat(end.location.longitude), latitude: parseFloat(end.location.latitude) }}
+              waypoints={waypoints.map(({ location }) => ({ longitude: parseFloat(location.longitude), latitude: parseFloat(location.latitude) }))}
               lineDashPattern={[1]}
               apikey="AIzaSyCBiU4oYll98xI7IocNOONCCgvkJr3dTZA"
               strokeWidth={2}
@@ -292,57 +307,104 @@ class MarshalRide extends Component {
             />}
 
             {currentLoc && <GeoMarker
-              key={Math.floor(Math.random() * 100) + 1}
+              key={Math.floor(Math.random() * 1000) + 1}
               coords={{ longitude: currentLoc.longitude, latitude: currentLoc.latitude }}
-              icon="chevron-circle-down"
-              onClick={this.onMarkerClick}
+              icon="map-marker"
+              // onClick={this.onMarkerClick}
               color="red"
               size={20}
             />
             }
 
+            {start && <GeoMarker
+              key={Math.floor(Math.random() * 1000) + 1}
+              coords={{ longitude: start.location.longitude, latitude: start.location.latitude }}
+              icon="chevron-circle-down"
+              onClick={this.onMarkerClick}
+              location_id={start.location.location_id}
+              color="blue"
+              size={15}
+            />
+            }
+
+            {end && <GeoMarker
+              key={Math.floor(Math.random() * 1000) + 1}
+              coords={{ longitude: end.location.longitude, latitude: end.location.latitude }}
+              icon="chevron-circle-down"
+              onClick={this.onMarkerClick}
+              location_id={end.location.location_id}
+              color="blue"
+              size={15}
+            />
+            }
+
             {waypoints && waypoints.map((point, key) => {
-              return <GeoMarker
-                key={key}
-                coords={{ longitude: point.longitude, latitude: point.latitude }}
-                icon="chevron-circle-down"
-                name={point.location_name}
-                onClick={this.onMarkerClick}
-                color="blue"
-                size={15}
-              />
+              if (point.is_join_location == true) {
+                return <GeoMarker
+                  key={key}
+                  coords={{ longitude: point.location.longitude, latitude: point.location.latitude }}
+                  icon="chevron-circle-down"
+                  name={point.location.location_name}
+                  onClick={this.onMarkerClick}
+                  location_id={point.location.location_id}
+                  color="blue"
+                  size={15}
+                />
+              }
+
             })}
           </MapView>
-          {/* <FlatList
-          data={this.state.dataSource}
-          renderItem={({ item }) =>
-            <Text style={this.state.currentLoc?.location_id === item.location_id ? styles.selected : styles.item}
-              onPress={() => { this.onModalOpen(item) }} >{item.location_name}</Text>}
-          ItemSeparatorComponent={this.renderSeparator}
-          keyExtractor={(item, index) => index.toString()}
-        /> */}
-          <Modal
-            animationType={"fade"}
-            transparent={false}
-            visible={this.state.isModalVisible}
-            onRequestClose={() => { console.log("Modal has been closed.") }}>
-            
+        </View>
+
+        <View>
+          {!this.state.isStarted && <Button onPress={this.onStart.bind(this)} title="Start" />}
+          {this.state.isStarted &&
+            <View style={styles.picker}>
+              <Picker
+                mode="dropdown"
+                selectedValue={incident}
+                onValueChange={(item) => {
+                  this.setState({ incident: item });
+                }}>
+                {INCIDENTS.map((item, index) => {
+                  return (<Picker.Item label={item} value={item} key={index} />)
+                })}
+              </Picker>
+              <Button onPress={this.onIncident.bind(this)} title="Incident" />
+            </View>}
+        </View>
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={this.state.isModalVisible}
+          onRequestClose={() => { this.onModalClose() }}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            onPressOut={() => { this.onModalClose() }}
+          >
+
+            <TouchableWithoutFeedback>
               <View style={styles.modal}>
-                <Text style={styles.text}>Mark Participants </Text>
                 <FlatList
+                  scrollEnabled={false}
                   data={this.state.children}
                   renderItem={({ item }) =>
-                    <Text style={item.isSelected ? styles.selected : styles.item} onPress={() => this.selectItem(item)} >{item.user.name}</Text>}
+                    <Text
+                      style={item.isSelected ? styles.selected : styles.item}
+                      onPress={() => this.selectItem(item)}
+                    >
+                      {item.child.name} - {item.status}
+                    </Text>}
                   ItemSeparatorComponent={this.renderSeparator}
                   keyExtractor={(item, index) => index.toString()}
                 />
-                <Button title="Joined" onPress={() => { this.onJoined() }} />
-                <Button title="Back" onPress={() => { this.onModalClose() }} />
-              </View> 
+                {rideId && <Button title="Add" onPress={() => { this.onJoined() }} />}
+              </View>
+            </TouchableWithoutFeedback>
+          </TouchableOpacity>
+        </Modal>
 
-              
-          </Modal>
-        </View>
       </View>
     );
   }
@@ -354,7 +416,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f6f6f6",
   },
+  modal: {
+    //justifyContent: 'center',
+    //alignItems: 'center',
+    backgroundColor: "#FFFAFA",
+    height: '50%',
+    width: '80%',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#1E90FF',
+    marginTop: 90,
+    marginLeft: 40,
+    padding: 20
+    // alignItems: 'center',
 
+  },
   item: {
     padding: 10,
     fontSize: 18,

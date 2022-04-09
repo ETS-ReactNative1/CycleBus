@@ -44,9 +44,10 @@ class UserManager(BaseUserManager):
         if password is None:
             raise TypeError('Superusers must have a password.')
 
-        user = self.create_user(username, email, password)
+        user = self.create_user(username,username, email, password,password)
         user.is_superuser = True
         user.is_admin = True
+        user.is_staff = True
         user.save()
 
         return user
@@ -68,6 +69,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     # is_admin : Used to control logging to Django Admin site
     is_admin = models.BooleanField(default=False)
+
+    # is_staff : Used to control logging to Django Admin site
+    is_staff = models.BooleanField(default=False)
+
 
     # created_at : created timestamp
     created_at = models.DateTimeField(auto_now_add=True)

@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Home from "../Views/Home/HomeView";
 import MarshalBus from "../Views/Marshal/MarshalBusView";
 import Profile from '../Views/Profile/ProfileView';
+import Children from '../Views/Child/Children';
 
 
 const Stack = createNativeStackNavigator();
@@ -12,10 +13,10 @@ const screenOptionStyle={
   headerShown: false
 }
 
-const ParentStackNavigator = () => {
+const HomeStackNavigator = () => {
   return (
     <Stack.Navigator screenOptions={screenOptionStyle}>
-      <Stack.Screen name="Home" component={Home}  />
+      <Stack.Screen name="HomeView" component={Home}  />
     </Stack.Navigator>
   );
 }
@@ -31,9 +32,16 @@ const MarshalStackNavigator = () => {
 const ProfileStackNavigator = () => {
   return (
     <Stack.Navigator screenOptions={screenOptionStyle}>
-      <Stack.Screen name="Profile" component={Profile}  />
+      <Stack.Screen name="ProfileView" component={Profile}  />
     </Stack.Navigator>
   );
 }
 
-export { MarshalStackNavigator,ParentStackNavigator ,ProfileStackNavigator};
+const ChildrenStackNavigator = () => {
+  return (
+    <Stack.Navigator screenOptions={screenOptionStyle}>
+      <Stack.Screen name="ChildrenView" component={Children}  />
+    </Stack.Navigator>
+  );
+}
+export { MarshalStackNavigator,HomeStackNavigator ,ProfileStackNavigator,ChildrenStackNavigator};

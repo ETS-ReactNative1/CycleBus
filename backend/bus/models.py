@@ -37,7 +37,7 @@ class Bus(models.Model):
         self.save()
 
     def __str__(self):
-        return self.bus_id
+        return self.bus_name
 
 
 
@@ -55,6 +55,7 @@ class RouteIndex(models.Model):
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
     location = models.ForeignKey(Location, on_delete=models.CASCADE, verbose_name="route_index_location", related_name="route_index_location")
     index = models.IntegerField()
+    is_join_location = models.BooleanField(default=False)
 
     def __str__(self):
         return self.index
@@ -72,6 +73,7 @@ class Ride(models.Model):
                               related_name="ride_route", on_delete=models.CASCADE)
     marshal = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    current_location = models.CharField(max_length=100)
     created_on = models.DateTimeField(default=timezone.now)
     last_updated = models.DateTimeField(blank=True, null=True)
 
@@ -84,19 +86,17 @@ class Ride(models.Model):
 
 
 class Attendance(models.Model):
-    attendance_id = models.IntegerField(primary_key=True)
-    start_location = models.ForeignKey(
-        "Location", verbose_name="location", related_name="attend_start_location", on_delete=models.CASCADE)
-    end_location = models.ForeignKey(
-        "Location", verbose_name="location", related_name="attend_end_location", on_delete=models.CASCADE)
-    start_date_time = models.DateTimeField()
-    start_date_time = models.DateTimeField()
-    # change later to [location,time]
-    route = models.CharField(max_length=100)
+    attendance_id = models.AutoField(primary_key=True)
+    join_location = models.ForeignKey(
+        "Location", verbose_name="location", related_name="attend_start_location", on_delete=models.CASCADE,null=True)
+    join_geo = models.CharField(max_length=100,blank=True, null=True)
+    join_date_time = models.DateTimeField(blank=True, null=True)
+    end_date_time = models.DateTimeField(blank=True, null=True)
     ride = models.ForeignKey("Ride", verbose_name="ride",
                              related_name="attend_ride", on_delete=models.CASCADE)
     attendee = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    status =  models.CharField(max_length=100)
     created_on = models.DateTimeField(default=timezone.now)
     last_updated = models.DateTimeField(blank=True, null=True)
 

@@ -1,8 +1,10 @@
 from tracemalloc import start
 from django.utils import timezone
 from django.shortcuts import render
+from bus.models import Attendance
+from user.views import JoinLocationApiView
+from user.models import JoinBusLocation
 from user.models import Child
-from user.serializers import ChildListSerializer, ChildSerializer
 from bus.models import Route, RouteIndex,Ride
 from bus.models import Bus
 from rest_framework import status
@@ -11,9 +13,10 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.models import Group
+from django.http import Http404
 
 from .serializers import(
-    LocationSerializer, BusSerializer, RouteSerializer, RouteViewSerializer, RideSerializer
+    AttendenceSerializer, LocationSerializer, BusSerializer, MarshalBusSerializer, RouteIndexSerializer, RouteSerializer, RouteViewSerializer, RideSerializer
 )
 
 class LocationAPIView(APIView):
@@ -46,24 +49,32 @@ class BusAPIView(APIView):
 
         return Response({"bus_id":bus_obj.bus_id}, status=status.HTTP_201_CREATED)
 
+
     def get(self, request, id=None):
+        start = request.query_params.get('start',None)
+        end = request.query_params.get('end',None)
         if id:
             bus = Bus.objects.get(bus_id=id)
             serializer = BusSerializer(bus)
             return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
 
         bus_list = Bus.objects.all()
+       
         serializer = BusSerializer(bus_list, many=True)
         return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
 
 class RouteAPIView(APIView):
-    serializer_class =RouteSerializer
 
 
     def get(self, request, id, rid):
         route = Route.objects.get(bus_id = id, route_id =rid)
-        serializer = RouteViewSerializer(route)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        locs = RouteIndex.objects.filter(route_id = rid).order_by('index')
+        locations_ser = RouteIndexSerializer(locs, many=True)
+        serializer = RouteSerializer(route)
+
+        res = serializer.data
+        res['locations'] = locations_ser.data
+        return Response(res, status=status.HTTP_200_OK)
 
     def list(self, request, id):
         routes = Route.objects.filter(bus_id = id)
@@ -84,7 +95,9 @@ class RideAPIView(APIView):
 
     def get(self, request, id):
         rides = Ride.objects.get(ride_id = id)
-        serializer = RideSerializer(rides)
+        child_id = request.query_params.get('child',None)
+
+        serializer = RideSerializer(rides,context = {'child':child_id})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -105,15 +118,12 @@ class RideAPIView(APIView):
 
 class MartialChildAPIView(APIView):
     # permission_classes = (IsAuthenticated,) #TODO: IsMartial with permission
-    serializer_class = ChildListSerializer
+    serializer_class = MarshalBusSerializer
 
-    def get(self, request, id=None):
-        children = Child.objects.filter(registered_buses__in = id)
-
-        start_loc = request.query_params.get('start',None)
-        if start_loc is not None:
-            children = children.filter(join_location_id= start_loc) 
-        serializer = self.serializer_class(children, many=True)
+    def get(self, request, rid, lid):
+        ride_id = request.query_params.get('ride',None)
+        children = JoinBusLocation.objects.filter(route_id = rid, join_location_id=lid)
+        serializer = self.serializer_class(children, many=True, context={'ride_id':ride_id})
         return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
             
 class MarshalBusAPIView(APIView):
@@ -121,8 +131,32 @@ class MarshalBusAPIView(APIView):
     serializer_class =BusSerializer
 
     def get(self, request, id=None):
-
         current_user = request.user
         bus_list = Bus.objects.filter(default_marshal_id=current_user.id)
         serializer = BusSerializer(bus_list, many=True)
         return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+
+class AttendenceApiView(APIView):
+    serializer_class =AttendenceSerializer
+
+    def put(self, request, id):
+        try:
+            ride = Ride.objects.get(ride_id=id)
+
+            for child in request.data.get("attendence",[]):
+                attendee = child.pop('attendee',None)
+                try:
+                    JoinBusLocation.objects.get(route_id =ride.route_id, child_id=attendee )
+                    if request.user.id ==  ride.marshal_id:
+                        child['join_date_time'] = timezone.now()
+
+                    obj, created = Attendance.objects.get_or_create(ride=ride, attendee_id=attendee) 
+                    serializer = self.serializer_class(obj, child, partial=True)
+                    serializer.is_valid(raise_exception=True)
+                    serializer.save()
+                except JoinBusLocation.DoesNotExist:
+                    raise Http404("User is not registered.")
+
+            return Response("success", status=status.HTTP_201_CREATED)
+        except Ride.DoesNotExist:
+            raise Http404("Ride not found")

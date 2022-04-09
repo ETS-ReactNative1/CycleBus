@@ -8,7 +8,7 @@
 // <ROOT>/App/Views/Login/LoginView.js
 
 import React, { Component } from "react";
-import { View, Text, TouchableOpacity, Image, TextInput, Button } from "react-native";
+import { View, Text, TouchableOpacity, Image, TextInput, Button, Alert } from "react-native";
 import MapView, { Polyline } from "react-native-maps";
 import { decode } from "@mapbox/polyline";
 import MapViewDirections from "react-native-maps-directions";
@@ -18,6 +18,13 @@ import APIKit from "../../shared/APIKit";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import GeoMarker from "./Marker";
 import axios from "axios";
+
+import BottomDrawer from "react-native-bottom-drawer-view";
+import { LinearGradient } from "expo-linear-gradient";
+import Spinner from "react-native-loading-spinner-overlay";
+import { color } from "../Common/Colors";
+
+const TAB_BAR_HEIGHT = 49;
 
 
 const GOOGLE_MAPS_API_KEY = "AIzaSyCBiU4oYll98xI7IocNOONCCgvkJr3dTZA";
@@ -36,6 +43,7 @@ class ParentRide extends Component {
       rideId: props.route.params.rideId,
       busId: props.route.params.busId,
       routeId: props.route.params.routeId,
+      childId: props.route.params.childDetail.child_id,
       startLocation: {
         latitude: parseFloat(props.route.params.childDetail.start_location.latitude),
         longitude: parseFloat(props.route.params.childDetail.start_location.longitude),
@@ -53,118 +61,59 @@ class ParentRide extends Component {
       count: 0,
       isStarted: false,
       marshalLocation: null,
-      status: false,
+      isDrawerVisible: false,
       time: 0,
-      timeInMin : 0,
-    
-      
-
+      stat: {},
+      insidentMsg: "Swipe Up for More Information"
     };
 
 
-    this.DisplayTime();
+    if (this.state.rideId != null) {
 
+      this.ws = new WebSocket("ws://192.168.0.54:8000/ws/ride/" + this.state.rideId + "/");
 
-    this.ws = new WebSocket("ws://192.168.0.54:8000/ws/ride/" + this.state.rideId + "/");
+      this.ws.onopen = () => { };
+      this.ws.onclose = (e) => { };
+      this.ws.onerror = (e) => { };
+      this.ws.onmessage = (e) => {
+        const received = JSON.parse(e.data);
+        const data = received.data;
+        const type = received.type;
+        if (type === 'loc') {
+          this.setState({
+            marshalLocation: {
+              latitude: parseFloat(data.split(",")[0]),
+              longitude: parseFloat(data.split(",")[1]),
+            },
+          });
+        }else if(type=='ins'){
+          this.setState({
+            insidentMsg:  "INFO:"+data
+          });
+        }
 
-    this.ws.onopen = () => { };
-    this.ws.onclose = (e) => { };
-    this.ws.onerror = (e) => { };
-    this.ws.onmessage = (e) => {
-      const location = JSON.parse(e.data);
-      this.setState({
-        marshalLocation: {
-          latitude: parseFloat(location.split(",")[0]),
-          longitude: parseFloat(location.split(",")[1]),
-        },
-      });
-    };
-  }
-
-  getTravelTime() {
-    const { marshalLocation, joinLocation } = this.state
-    if (marshalLocation) {
-      const origin = marshalLocation.latitude + ',' + marshalLocation.longitude;
-      const destination = joinLocation.latitude+','+joinLocation.longitude;
-      const mode = "bicycling";
-      const key = GOOGLE_MAPS_API_KEY;
-      var axios = require('axios');
-      const url = 'https://maps.googleapis.com/maps/api/distancematrix/json?origins=' + [origin] + '&destinations=' + [destination] + '&units=imperial&key=' + key +'&mode=' + [mode];
-      console.log(url)
-      var config = {
-        method: 'get',
-        url: url,
-        headers: {}
       };
-
-      axios(config)
-        .then((response) => {
-          console.log(JSON.stringify(response.data));
-          const jsonObj = JSON.parse(JSON.stringify(response.data));
-          console.log(jsonObj.rows.elements);
-          this.setState({ time: jsonObj.rows[0].elements[0].duration.value});
-          
-          
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-      // const service = new google.maps.DistanceMatrixService();
-      // const origin = this.state.currentLoc;
-      // const destination = this.state.joinLocation;
-      // url = 'https://maps.googleapis.com/maps/api/distancematrix/json'
-      // key = GOOGLE_MAPS_API_KEY
-      // params = {'key': key, 'origins': [origin], 'destinations': [destination]}
-
-      // req = requests.get(url=url, params=params)
-      // res = json.loads(req.content)
-      //   console.log(res)
-
-      // const request = {
-      //   origins: [origin],
-      //   destinations: [destination],
-      //   travelMode: google.maps.TravelMode.BICYCLING,
-      //   unitSystem: google.maps.UnitSystem.METRIC,
-      //   avoidHighways: false,
-      //   avoidTolls: false,
-      // };
-      // // get distance matrix response
-      // service.getDistanceMatrix([origin], [destination], google.maps.TravelMode.BICYCLING, (res, error) => {
-      //   console.log(res)
-      //   // put response
-
-      // });
     }
   }
 
-  DisplayTime(){
-    
-    this.timer = setInterval(() => {
-      const time = this.state.time;
-      this.setState({ time : (time-3) })
-    },3000);
-  }
+  ShowHideTimeComponentView = () => {
 
-
-  ShowHideTextComponentView = () => {
-
-    if (this.state.status == true) {
+    if (this.state.isDrawerVisible == true) {
       this.getTravelTime()
-
-
     }
     else {
-      this.setState({ status: true })
+      this.setState({ isDrawerVisible: true })
       this.getTravelTime()
     }
   }
-  async componentDidMount() {
+
+
+  componentDidMount() {
 
     const { busId, routeId } = this.state;
 
     const onSuccess = ({ data }) => {
-
-      data = data.locations.map(({ latitude, longitude }) => ({ longitude: parseFloat(longitude), latitude: parseFloat(latitude) }));
+      data = data.locations.map(({ location }) => ({ longitude: parseFloat(location.longitude), latitude: parseFloat(location.latitude) }));
       this.setState({
         start: data[0],
         waypoints: data.slice(1, -1),
@@ -172,7 +121,6 @@ class ParentRide extends Component {
         isLoading: false
       });
     };
-
     const onFailure = (error) => {
       console.log(error)
       this.setState({ errors: error.response.data, isLoading: false });
@@ -187,22 +135,84 @@ class ParentRide extends Component {
     // this.getLocation();
   }
 
-  render() {
-    const { isLoading, marshalLocation, startLocation, endLocation, joinLocation } = this.state;
+  rideInfo = () => {
+    this.setState({ isDrawerVisible: true })
+    const { rideId, childId } = this.state;
+    const onSuccess = ({ data }) => {
+      this.setState({
+        stat: data.stat
+      })
+    };
 
-    console.log("marshal", marshalLocation);
+    const onFailure = (error) => {
+      console.log(error)
+      this.setState({ errors: error.response.data, isLoading: false });
+    };
+
+    APIKit.get("ride/" + rideId + '/?child=' + childId).then(onSuccess).catch(onFailure);
+  }
+
+  inform = async (status) => {
+    const { childId, rideId } = this.state;
+    const payload = [
+      {
+        status: status,
+        attendee: childId
+      }
+    ];
+
+    const onSuccess = ({ data }) => {
+      console.log(data)
+      
+    };
+
+    const onFailure = (error) => {
+      console.log(error)
+      this.setState({ errors: error, isLoading: false });
+    };
+
+    APIKit.put("ride/" + rideId + "/attendence/", { attendence: payload }).then(onSuccess).catch(onFailure);
+
+  }
+
+  onPressInform =()=>{
+    Alert.alert(
+      "Participation",
+      "Would your child join the bus today? ",
+      [
+        {
+          text: "Yes",
+          onPress: () => {this.inform("Coming")},
+          style: "yes",
+        },
+        {
+          text: "No",
+          onPress: () => {this.inform("Not Coming")},
+          style: "no",
+        },
+        {
+          text: "Cancel",
+          onPress: () => {},
+          style: "cancel",
+        },
+      ],
+      {
+        cancelable: true,
+        onDismiss: () => {}
+      },
+      );
+  }
+
+  render() {
+    const { insidentMsg, stat, isLoading, isDrawerVisible, marshalLocation, startLocation, endLocation, joinLocation } = this.state;
+
     return (
       <View style={styles.container}>
-        <Button onPress={this.ShowHideTextComponentView} title="Show Iime" />
-
-        {this.state.status && <Text style={{ fontSize: 25, color: "#000", textAlign: 'center' }}> {Math.round(this.state.time) + "s"} </Text>}
-
+        <Spinner visible={isLoading} />
 
         <View style={styles.container}>
-          {/*Render our MapView*/}
           <MapView
             style={styles.map}
-            //specify our coordinates.
             initialRegion={galway}
           >
             <MapViewDirections
@@ -255,6 +265,47 @@ class ParentRide extends Component {
 
           </MapView>
         </View>
+        <BottomDrawer
+          containerHeight={400}
+          offset={50}
+          onExpanded={() => this.rideInfo()}
+          onCollapsed={() => this.setState({ isDrawerVisible: false })}
+          startUp={false}
+          borderRadius={100}
+          roundedEdges={true}
+        >
+          <View>
+            <View style={styles.msg}>
+              <Icon name="caret-up" color={"#FFFFFF"} size={10} />
+              <Text style={styles.msgTxt}>{insidentMsg}</Text>
+            </View>
+            <View style={styles.btnView}>
+              <View style={{ flexDirection: 'row' }}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={this.onPressInform.bind(this)}
+                >
+                  <Text style={styles.textButton}>Inform</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.button}
+                //onPress={this.onPressLogin.bind(this)}
+                >
+                  <Text style={styles.textButton}>Call</Text>
+                </TouchableOpacity>
+
+              </View>
+              <View style={styles.stat}>
+                {isDrawerVisible &&
+                  Object.keys(stat).map((key, index) => {
+                    return <Text style={styles.statTxt} key={index}>{key + " : "+stat[key]}</Text>
+                  })
+                }
+              </View>
+            </View>
+          </View>
+        </BottomDrawer>
 
       </View>
     );
@@ -268,6 +319,50 @@ const styles = StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFillObject,
+  },
+  stat: {
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#1E90FF',
+    width: "80%"
+  },
+  msg: {
+    width: "100%",
+    alignItems: 'center',
+    backgroundColor: '#1E90FF',
+  },
+  msgTxt: {
+    width: "100%",
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    textAlign: 'center'
+  },
+  button: {
+    width: '40%',
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+    backgroundColor: '#1E90FF',
+    elevation:2,
+    margin:10,
+  },
+  textButton: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  statTxt: {
+    fontSize: 15,
+    color: color.DARK_BLUE,
+    margin:2
+  },
+  btnView: {
+      alignItems: 'center',
+      color: '#1E90FF',
   },
 });
 

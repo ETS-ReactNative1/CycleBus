@@ -1,3 +1,4 @@
+from user.models import Profile
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from rest_framework.validators import UniqueValidator
@@ -57,7 +58,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
     # create new user
     def create(self, validated_data):
        
-        return User.objects.create_user(**validated_data)
+        user=User.objects.create_user(**validated_data)
+        Profile.objects.create(user=user)
+        return user
+        
 
 # called by LoginAPIView
 class LoginSerializer(serializers.Serializer):
@@ -67,6 +71,8 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(max_length=255, read_only=True)
     groups = serializers.CharField(max_length=255, read_only=True)
+    name = serializers.CharField(max_length=255, read_only=True)
+
 
 
     # matching against the database against registered credentials
@@ -102,7 +108,8 @@ class LoginSerializer(serializers.Serializer):
             'email': user.email,
             'username': user.username,
             'token': user.token,
-            'groups':user.groups
+            'groups':user.groups,
+            'name':user.name
         }
 
 # called by UserRetrieveUpdateAPIView

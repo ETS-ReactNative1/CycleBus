@@ -13,7 +13,7 @@ import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 
 import APIKit, { setClientToken } from "../../shared/APIKit";
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Animatable from 'react-native-animatable';
 //import LinearGradient from 'react-native-linear-gradient';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -29,7 +29,7 @@ import {
 
 
 const initialState = {
-  username: "layani@email.com",
+  username: "layani@gmail.com",
   password: "layani@123",
   errors: {},
   isAuthorized: false,
@@ -54,6 +54,14 @@ class Login extends Component {
     this.props.navigation.push("Register")
   };
 
+  storeData = async (key,value) => {
+    try {
+      await AsyncStorage.setItem(key, value)
+    } catch (e) {
+
+    }
+  }
+
   onPressLogin() {
     const { username, password } = this.state;
     const payload = { user: { email: username, password: password } };
@@ -64,6 +72,9 @@ class Login extends Component {
       this.props.navigation.navigate("DrawerParent")
 
       this.setState({ isLoading: false, isAuthorized: true });
+      this.storeData('username',data.username)
+      this.storeData('email',data.email)
+      this.storeData('name',data.name)
 
     };
 

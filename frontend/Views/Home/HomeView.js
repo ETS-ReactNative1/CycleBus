@@ -8,12 +8,10 @@
 // <ROOT>/App/Views/Login/LoginView.js
 
 import React, { Component } from "react";
-import { FlatList, StyleSheet, View, Text, Alert, TouchableOpacity, Image, TextInput } from "react-native";
-import Icon from 'react-native-vector-icons/Ionicons';
-
+import { FlatList, StyleSheet, TouchableWithoutFeedback, View, Text, Alert } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
-
-import APIKit, { setClientToken } from "../../shared/APIKit";
+import APIKit from "../../shared/APIKit";
+import { FlatItem } from "../Common/List";
 
 const initialState = {
     dataSource: []
@@ -24,7 +22,7 @@ const initialState = {
 class Home extends Component {
     state = initialState;
 
-    async componentDidMount() {
+    componentDidMount() {
 
         const onSuccess = ({ data }) => {
             this.setState({ dataSource: data.data, isLoading: false });
@@ -37,35 +35,53 @@ class Home extends Component {
         // Show spinner when call is made
         this.setState({ isLoading: true });
 
-        APIKit.get("child/").then(onSuccess).catch(onFailure);
+        APIKit.get("rides/").then(onSuccess).catch(onFailure);
 
     }
 
-    renderSeparator = () => {
-        return (
-            <View
-                style={{
-                    height: 1,
-                    width: "100%",
-                    backgroundColor: "#000",
-                }}
-            />
-        );
-    };
-    //handling onPress action  
-    getListViewItem = (item) => {
-        this.props.navigation.navigate("ChildDetail", {childId:item.user.id});
+    onRideClick(item) {
+        const onSuccess = ({ data }) => {
+            this.setState({ dataSource: data.data, isLoading: false });
+            data = data.data.find(x => x.route === item.route)
+
+            if (data.rideId !== null) {
+                this.props.navigation.navigate("ParentRide", {
+                    rideId: data.active_ride,
+                    routeId: data.route,
+                    busId: data.bus,
+                    joinLocation: data.join_location,
+                    childDetail: data.child
+                });
+            } else {
+                Alert.alert("No active ride found.")
+            }
+        };
+
+        const onFailure = (error) => {
+            this.setState({ errors: error.response.data, isLoading: false });
+        };
+
+        this.setState({ isLoading: true });
+
+        APIKit.get("rides/").then(onSuccess).catch(onFailure);
+
     }
 
     render() {
+        const { isLoading, dataSource } = this.state
         return (
             <View style={styles.container}>
+                <Spinner visible={isLoading} />
+
                 <FlatList
-                    data={this.state.dataSource}
+                    data={dataSource.filter((item) => item.active_ride !== null)}
                     renderItem={({ item }) =>
-                        <Text style={styles.item}
-                            onPress={this.getListViewItem.bind(this, item)}>{item.user.name}</Text>}
-                    ItemSeparatorComponent={this.renderSeparator}
+                        <TouchableWithoutFeedback onPress={() => this.onRideClick(item)}>
+                            <View>
+                                <FlatItem title={item.child.name} subtitle={item.child.school} />
+                            </View>
+                        </TouchableWithoutFeedback>
+                    }
                     keyExtractor={(item, index) => index.toString()}
                 />
             </View>
@@ -84,11 +100,8 @@ const utils = {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-    },
-    item: {
-        padding: 10,
-        fontSize: 18,
-        height: 44,
+        padding:10,
+        justifyContent:"center"
     },
 })
 

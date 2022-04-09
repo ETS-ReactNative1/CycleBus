@@ -68,3 +68,21 @@ class JWTAuthentication(authentication.BaseAuthentication):
             raise exceptions.AuthenticationFailed(msg)
 
         return (user, token)
+
+
+from django.contrib.auth.backends import BaseBackend
+from django.contrib.auth.hashers import check_password
+
+class AdminBackend(BaseBackend):
+    def authenticate(self, request, username=None, password=None):
+        user = self.get_user(username)
+        if user:
+            check_password(user.password,password)
+            return user
+        return None
+
+    def get_user(self, username):
+        try:
+            return User.objects.get(username=username)
+        except User.DoesNotExist:
+            return None

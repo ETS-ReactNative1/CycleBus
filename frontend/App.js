@@ -13,16 +13,24 @@ import BusDetail from "./Views/Bus/BusDetailView";
 import RouteMap from "./Views/Map/RouteMapView";
 import MarshalRide from "./Views/Ride/MarshalRideView";
 import ParentRide from "./Views/Ride/ParentRideView";
+import EditProfile from "./Views/Profile/EditProfileView";
 
 const Stack = createNativeStackNavigator();
 
 const screenOptionStyle = {
   headerShown: false
 }
+const headerStyle = {
+  headerStyle: {
+    backgroundColor: "#1E90FF",
+  },
+  headerTintColor: "white",
+  headerBackTitle: "Back",
+}
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="login">
+      <Stack.Navigator screenOptions={headerStyle} initialRouteName="login">
         <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
         <Stack.Screen name="DrawerParent" component={DrawerNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="ChildDetail" component={ChildDetail} options={{ title: "Child Detail" }} />
@@ -33,6 +41,7 @@ const App = () => {
         <Stack.Screen name="BusList" component={BusList} options={{ title: "Bus List " }} />
         <Stack.Screen name="ParentRide" component={ParentRide} options={{ title: "Ride View " }} />
         <Stack.Screen name="MarshalRide" component={MarshalRide} options={{ title: "Ride View " }} />
+        <Stack.Screen name="EditProfile" component={EditProfile} options={{ headerShown: false }} />
         <Stack.Screen name="Map" component={Map} />
         <Stack.Screen name="BusDetail" component={BusDetail} />
         <Stack.Screen name="RouteMap" component={RouteMap} />
