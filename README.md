@@ -14,7 +14,8 @@ Apart from the mobile application Django administration site is implemented as a
 7. Enabling parent to track location of cycle bus
 8. Incident reporting by marshal
 9. Display data to parent(inicident, weather data and reach time of cycle bus to join location of child)
-10. Enabling Admin user to set deafult marshal and route for a cycle bus
+10. Mark and check attendance of child
+11. Enabling Admin user to set deafult marshal and route for a cycle bus
 
 ## Table of Contents
 
