@@ -34,6 +34,9 @@ Install the below tools/packages
 | 3           | react-native       | [Install react-native](https://www.npmjs.com/package/react-native) |
 | 4           | react-native-cli   | [Install react-native-cli](https://www.npmjs.com/package/react-native-cli) |
 | 5           | exp                | [Install Expo](https://www.npmjs.com/package/exp) |
+| 6           | Python             | [Install Python](https://www.python.org/downloads/) |
+| 7           | pip                | [Install pip](https://pip.pypa.io/en/stable/installation/) |
+| 8           | Django             | [Install Django](https://docs.djangoproject.com/en/4.0/topics/install/) |
 
 
 ## Setup Instructions
