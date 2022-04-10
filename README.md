@@ -5,17 +5,18 @@ Apart from the mobile application Django administration site is implemented as a
 
 ## Main Features
 
-1. Registration of parent and children to the mobile app
-2. Register child to a cycle bus
-3. Select join location of child for each route of the cycle bus
+1. Registration of parents and children to the mobile app
+2. Register the child to a cycle bus by the parent
+3. Select the join location of the child for each route of the cycle bus
 4. Starting a ride by marshal 
-5. Retrieve GPS location of the marshal
+5. Retrieve the GPS location of the marshal
 6. Map views to both parent and Marshal 
-7. Enabling parent to track location of cycle bus
-8. Incident reporting by marshal
-9. Display data to parent(inicident, weather data and reach time of cycle bus to join location of child)
-10. Mark and check attendance of child
-11. Enabling Admin user to set deafult marshal and route for a cycle bus
+7. Mark the participation of the child by the parent. 
+8. Enabling parents to track the location of cycle bus
+9. Incident reporting by marshal
+10. Display data to parent(incident, weather data, and reach the time of cycle bus to join location of the child)
+11. Mark and check the attendance of the child
+12. Enabling Admin user to set default marshal and route for a cycle bus
 
 ## Table of Contents
 
@@ -49,18 +50,18 @@ Install the below tools/packages
 1. Clone the repository with ```git clone [REPO_URL]``` command
 2. Navigate to the project's root directory(frontend) in terminal
 3. Install the dependencies by running ```npm install```
-4. Once, 'npm install' is completed, run ```exp start``` to start the expo and react-native server
-5. If a QR code and a link shown on the terminal installation is finished successfully
+4. Once 'npm install' is completed, run ```exp start``` to start the expo and react-native server
+5. If a QR code and a link shown on the terminal installation are successful
 
 #### Mobile setup
 
-1. Install 'Expo' application on your android/iOS device. Follow the [link](https://expo.io/tools#client).
+1. Install the 'Expo' application on your android/iOS device. Follow the [link](https://expo.io/tools#client).
 2. Scan the QR code shown on the terminal.
-3. Once the QR code is successfully scanned, it will take few seconds to load and render the app.
+3. Once the QR code is successfully scanned, it will take a few seconds to load and render the app.
 
 ### Backend
 
-Navigate to root directory(backend)
+Navigate to the root directory(backend)
 
 Then install the dependencies:
 
@@ -75,11 +76,11 @@ $ python manage.py runserver
 
 ### Configuring IP Address
 
-Change IP address in line 5 of in APIKit.js, IP address in line 73 of ParentRideView.js and IP address in line 68 of MarshalRideView to your IP address.
+Change the IP address in line 5 of APIKit.js, IP address in line 73 of ParentRideView.js and IP address in line 68 of MarshalRideView to your IP address.
 
 
 ## Troubleshooting
 
 ### Networking
 
-Make sure your mobile device and server connected  to same Local Area Network.
+Make sure your mobile device and server are connected to same Local Area Network.
