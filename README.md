@@ -8,7 +8,7 @@ Apart from the mobile application Django administration site is implemented as a
 1. Registration of parent and children to the mobile app
 2. Register child to a cycle bus
 3. Mark the start and end location of child for each route of the cycle bus
-4. Starting and ending a ride by marshal 
+4. Starting a ride by marshal 
 5. Retrieve GPS location of the marshal
 6. Map views to both parent and Marshal 
 7. Enabling parent to track location of cycle bus
