@@ -78,10 +78,10 @@ Once `pip` has finished downloading the dependencies:
 $ python manage.py runserver
 ```
 
-### Configuring IP Address
+### Configuring IP Address and Google Map API key
 
-Change the IP address in line 5 of APIKit.js, IP address in line 73 of ParentRideView.js and IP address in line 68 of MarshalRideView to your IP address.
-
+1. Change the API_URL, WS_URL (frontend >> shared >> Keys.js) according to your IP address and GOOGLE_MAP_KEY(frontend >>shared) to your Google maps API key. 
+2. Change GOOGLE_MAP_KEY(backend >> config.py) to your Google maps API key. 
 
 ## Troubleshooting
 
