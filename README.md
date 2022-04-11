@@ -3,6 +3,10 @@
 Cycle Bus is a mobile application which accomodates the requirements of cycle bus community, an initiative to promote cycling among school children. Children are guided by a Marshal who can be a parent or a volunteer. 
 Apart from the mobile application Django administration site is implemented as a webbased system.
 
+## Demo
+
+[![Watch the video](https://img.youtube.com/vi/Oqf4gTRgd74/maxresdefault.jpg)](https://youtu.be/Oqf4gTRgd74)
+
 ## Main Features
 
 1. Registration of parents and children to the mobile app
