@@ -21,6 +21,7 @@ import MapView from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
 import { INCIDENTS } from "../Common/Incidents";
 import { Picker } from "@react-native-picker/picker";
+import { keys } from "../../shared/Keys";
 
 const galway = {
   latitude: 53.270962,
@@ -65,7 +66,7 @@ class MarshalRide extends Component {
         routeLocations: data.route.locations,
       });
 
-      this.ws = new WebSocket("ws://192.168.0.54:8000/ws/ride/" + data.ride_id + "/");
+      this.ws = new WebSocket(keys.WS_URL+"/ws/ride/" + data.ride_id + "/");
       this.ws.onopen = () => { this.getGeoLoc() };
       this.ws.onclose = (e) => { };
       this.ws.onerror = (e) => { console.log(e) };
@@ -85,7 +86,7 @@ class MarshalRide extends Component {
 
 
   onIncident() {
-    const {incident} = this.state
+    const { incident } = this.state
     console.log(incident);
     this.ws.send(
       JSON.stringify(
@@ -127,6 +128,7 @@ class MarshalRide extends Component {
     const payload = {};
 
     const onSuccess = ({ data }) => {
+      this.props.navigation.navigate("ParticipantView",{rideId:rideId});
       console.log("ride end " + data)
     };
 
@@ -173,11 +175,12 @@ class MarshalRide extends Component {
   }
 
   async getFencedWayPoint(current) {
-    const { count, waypoints } = this.state
+    const { count, waypoints,end } = this.state
+    const points=[...waypoints,end]
     const init = Math.max(count - 2, 0)
-    for (let i = init; i < waypoints.length; i++) {
+    for (let i = init; i < points.length; i++) {
       point1 = current
-      point2 = waypoints[i].location
+      point2 = points[i].location
       var lat1 = point1.latitude;
       var lon1 = point1.longitude;
       var lat2 = point2.latitude;
@@ -192,7 +195,7 @@ class MarshalRide extends Component {
       const dist = 12742 * Math.asin(Math.sqrt(a));
       if (dist < 0.1) {
         this.setState({ count: i });
-        return waypoints[i]
+        return points[i]
       }
     }
     return null
@@ -206,9 +209,10 @@ class MarshalRide extends Component {
       if (fencedpoint.is_join_location && waypoints[count].location.location_id !== fencedpoint.location.location_id) {
         this.onMarkerClick(fencedpoint.location.location_id);
       }
-      if (count == waypoints.length) {
+      if (end.location.location_id === fencedpoint.location.location_id) {
         this.onModalClose();
         this.endRide();
+
       }
     }
 
@@ -299,7 +303,7 @@ class MarshalRide extends Component {
               destination={{ longitude: parseFloat(end.location.longitude), latitude: parseFloat(end.location.latitude) }}
               waypoints={waypoints.map(({ location }) => ({ longitude: parseFloat(location.longitude), latitude: parseFloat(location.latitude) }))}
               lineDashPattern={[1]}
-              apikey="AIzaSyCBiU4oYll98xI7IocNOONCCgvkJr3dTZA"
+              apikey={keys.GOOGLE_MAP_KEY}
               strokeWidth={2}
               strokeColor="#111111"
               mode="BICYCLING"
@@ -309,8 +313,7 @@ class MarshalRide extends Component {
             {currentLoc && <GeoMarker
               key={Math.floor(Math.random() * 1000) + 1}
               coords={{ longitude: currentLoc.longitude, latitude: currentLoc.latitude }}
-              icon="map-marker"
-              // onClick={this.onMarkerClick}
+              icon="chevron-circle-down"
               color="red"
               size={20}
             />

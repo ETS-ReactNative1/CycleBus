@@ -17,6 +17,7 @@ import * as Permissions from "expo-permissions";
 import * as Location from "expo-location";
 import { StyleSheet } from "react-native";
 import GeoMarker from "../Ride/Marker";
+import { keys } from "../../shared/Keys";
 
 const initialState = {
     geoPoints: [],
@@ -67,7 +68,7 @@ class RouteMap extends Component {
                             destination={{ longitude: parseFloat(end.longitude), latitude: parseFloat(end.latitude) }}
                             waypoints={waypoints.map(({ longitude, latitude }) => ({ longitude: parseFloat(longitude), latitude: parseFloat(latitude) }))}
                             lineDashPattern={[1]}
-                            apikey="AIzaSyCBiU4oYll98xI7IocNOONCCgvkJr3dTZA"
+                            apikey={keys.GOOGLE_MAP_KEY}
                             strokeWidth={2}
                             strokeColor="#111111"
                             mode="BICYCLING"

@@ -23,11 +23,11 @@ import BottomDrawer from "react-native-bottom-drawer-view";
 import { LinearGradient } from "expo-linear-gradient";
 import Spinner from "react-native-loading-spinner-overlay";
 import { color } from "../Common/Colors";
+import { keys } from "../../shared/Keys";
 
 const TAB_BAR_HEIGHT = 49;
 
 
-const GOOGLE_MAPS_API_KEY = "AIzaSyCBiU4oYll98xI7IocNOONCCgvkJr3dTZA";
 const galway = {
   latitude: 53.270962,
   longitude: -9.06269,
@@ -70,7 +70,7 @@ class ParentRide extends Component {
 
     if (this.state.rideId != null) {
 
-      this.ws = new WebSocket("ws://192.168.0.54:8000/ws/ride/" + this.state.rideId + "/");
+      this.ws = new WebSocket(keys.WS_URL+"/ws/ride/" + this.state.rideId + "/");
 
       this.ws.onopen = () => { };
       this.ws.onclose = (e) => { };
@@ -220,7 +220,7 @@ class ParentRide extends Component {
               destination={this.state.end}
               waypoints={this.state.waypoints}
               lineDashPattern={[0]}
-              apikey="AIzaSyCBiU4oYll98xI7IocNOONCCgvkJr3dTZA"
+              apikey={keys.GOOGLE_MAP_KEY}
               strokeWidth={4}
               strokeColor="#111111"
               mode="BICYCLING"
@@ -248,8 +248,8 @@ class ParentRide extends Component {
             {endLocation &&
               <GeoMarker
                 coords={endLocation}
-                icon="building-o"
-                color="red"
+              icon="chevron-circle-down"
+                
                 size={20}
               />
             }

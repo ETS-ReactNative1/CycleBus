@@ -13,7 +13,7 @@ class FlatItem extends Component {
                     <View style={{ flex: 2 }} >
                         <ProfileIcon name={this.props.title} />
                     </View>
-                    <View style={{ flex: 10 }} >
+                    <View style={{ flex: 10,marginLeft:5 }} >
                         <Text style={{ color: color.DARK_BLUE, fontSize: 18 }}>{this.props.title}</Text>
                         <Text style={{ color: color.DARK_BLUE, fontSize: 12 }}>{this.props.subtitle}</Text>
                     </View>

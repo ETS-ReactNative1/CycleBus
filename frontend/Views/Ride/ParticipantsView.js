@@ -8,11 +8,10 @@
 // <ROOT>/App/Views/Login/LoginView.js
 
 import React, { Component } from "react";
-import { FlatList, StyleSheet, View, Text, Alert, TouchableOpacity, Image, TextInput } from "react-native";
-import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import { FlatList, StyleSheet, TouchableWithoutFeedback, View, Text, Alert } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
-import APIKit, { setClientToken } from "../../shared/APIKit";
-import { FlatItem, Seperator } from "../Common/List";
+import APIKit from "../../shared/APIKit";
+import { FlatItem } from "../Common/List";
 
 const initialState = {
     dataSource: []
@@ -20,10 +19,10 @@ const initialState = {
 
 
 
-class Children extends Component {
+class Participants extends Component {
     state = initialState;
 
-     componentDidMount() {
+    componentDidMount() {
 
         const onSuccess = ({ data }) => {
             this.setState({ dataSource: data.data, isLoading: false });
@@ -33,31 +32,22 @@ class Children extends Component {
             this.setState({ errors: error.response.data, isLoading: false });
         };
 
-        // Show spinner when call is made
         this.setState({ isLoading: true });
 
-        APIKit.get("child/").then(onSuccess).catch(onFailure);
+        APIKit.get("ride/"+this.props.route.params.rideId+"/attendence/").then(onSuccess).catch(onFailure);
 
-    }
-
-
-    onPress = (item) => {
-        this.props.navigation.navigate("ChildDetail", { childId: item.user.id });
     }
 
     render() {
-        console.log(this.state.dataSource);
-
+        const { isLoading, dataSource } = this.state
         return (
             <View style={styles.container}>
+                <Spinner visible={isLoading} />
+
                 <FlatList
-                    data={this.state.dataSource}
-                    renderItem={({ item }) => 
-                        <TouchableWithoutFeedback onPress={() => this.onPress(item)}>
-                            <View>
-                                <FlatItem title={item.user.name} subtitle={item.end_location.location_name} />
-                            </View>
-                         </TouchableWithoutFeedback>
+                    data={dataSource.filter((item) => item.active_ride !== null)}
+                    renderItem={({ item }) =>
+                        <FlatItem title={item.attendee.name} subtitle={item.status} />
                     }
                     keyExtractor={(item, index) => index.toString()}
                 />
@@ -72,10 +62,6 @@ const styles = StyleSheet.create({
         padding: 10,
         justifyContent: "center"
     },
-    item: {
-        fontSize: 18,
-        height: 44,
-    }
 })
 
-export default Children;
+export default Participants;

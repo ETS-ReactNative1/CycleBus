@@ -14,6 +14,7 @@ import RouteMap from "./Views/Map/RouteMapView";
 import MarshalRide from "./Views/Ride/MarshalRideView";
 import ParentRide from "./Views/Ride/ParentRideView";
 import EditProfile from "./Views/Profile/EditProfileView";
+import Participants from "./Views/Ride/ParticipantsView";
 
 const Stack = createNativeStackNavigator();
 
@@ -45,6 +46,7 @@ const App = () => {
         <Stack.Screen name="Map" component={Map} />
         <Stack.Screen name="BusDetail" component={BusDetail} />
         <Stack.Screen name="RouteMap" component={RouteMap} />
+        <Stack.Screen name="ParticipantView" component={Participants} />
       </Stack.Navigator>
     </NavigationContainer>
   );

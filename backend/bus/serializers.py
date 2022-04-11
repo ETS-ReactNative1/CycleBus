@@ -3,6 +3,7 @@ import math
 from tracemalloc import start
 from authentication.models import User
 from authentication.serializers import UserSerializer
+from config import GOOGLE_MAP_KEY
 from user.models import JoinBusLocation
 from rest_framework import serializers
 from django.contrib.auth import authenticate
@@ -119,7 +120,7 @@ class RideSerializer(serializers.ModelSerializer):
         school = child_data.child.child_user.start_location
         join_location = child_data.join_location
         current_location = instance.current_location
-        GOOGLE_MAPS_API_KEY = "AIzaSyCBiU4oYll98xI7IocNOONCCgvkJr3dTZA"
+        GOOGLE_MAPS_API_KEY = GOOGLE_MAP_KEY
 
         origin1 = current_location
         destination1 = join_location.latitude + ',' + join_location.longitude
