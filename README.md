@@ -5,7 +5,7 @@ Apart from the mobile application Django administration site is implemented as a
 
 ## Demo
 
-[![Watch the video](https://img.youtube.com/vi/Oqf4gTRgd74/maxresdefault.jpg)](https://youtu.be/Oqf4gTRgd74)
+[![Watch the video](https://img.youtube.com/vi/I3PRPc7T0Ok/maxresdefault.jpg)](https://youtu.be/I3PRPc7T0Ok)
 
 ## Main Features
 
