@@ -5,8 +5,7 @@ Apart from the mobile application Django administration site is implemented as a
 
 ## Demo
 
-[![Watch the video](https://img.youtube.com/vi/Oqf4gTRgd74/maxresdefault.jpg)](https://youtu.be/Oqf4gTRgd74)
-
+[![Watch the video](https://img.youtube.com/vi/I3PRPc7T0Ok/0.jpg)](https://www.youtube.com/watch?v=I3PRPc7T0Ok)
 ## Main Features
 
 1. Registration of parents and children to the mobile app
@@ -33,17 +32,18 @@ Apart from the mobile application Django administration site is implemented as a
 
 Install the below tools/packages
 
-| Serial No   | Software           | Installation site |
-| :---------: | :----------------: | :---------------- |
-| 1           | Node.js            | [Install NodeJS](https://nodejs.org/en/download/) |
-| 2           | npm                | [Install NPM](https://www.npmjs.com/get-npm)      |
-| 3           | react-native       | [Install react-native](https://www.npmjs.com/package/react-native) |
-| 4           | react-native-cli   | [Install react-native-cli](https://www.npmjs.com/package/react-native-cli) |
-| 5           | exp                | [Install Expo](https://www.npmjs.com/package/exp) |
-| 6           | Python             | [Install Python](https://www.python.org/downloads/) |
-| 7           | pip                | [Install pip](https://pip.pypa.io/en/stable/installation/) |
-| 8           | Django             | [Install Django](https://docs.djangoproject.com/en/4.0/topics/install/) |
-
+| Serial No   | Software                   | Installation site |
+| :---------: | :----------------:         | :---------------- |
+| 1           | Node.js                    | [Install NodeJS](https://nodejs.org/en/download/) |
+| 2           | npm                        | [Install NPM](https://www.npmjs.com/get-npm)      |
+| 3           | react-native               | [Install react-native](https://www.npmjs.com/package/react-native) |
+| 4           | react-native-cli           | [Install react-native-cli](https://www.npmjs.com/package/react-native-cli) |
+| 5           | exp                        | [Install Expo](https://www.npmjs.com/package/exp) |
+| 6           | Python                     | [Install Python](https://www.python.org/downloads/) |
+| 7           | pip                        | [Install pip](https://pip.pypa.io/en/stable/installation/) |
+| 8           | Django                     | [Install Django](https://docs.djangoproject.com/en/4.0/topics/install/) |
+| 9           | Google API Key             | [Get Google API Key](https://cloud.google.com/docs/authentication/api-keys)|
+| 10          | OpenWeatherMap API Key     | [Get OpenWeatherMap API Key](https://openweathermap.org/api)|
 
 ## Setup Instructions
 
@@ -82,6 +82,7 @@ $ python manage.py runserver
 
 1. Change the API_URL, WS_URL (frontend >> shared >> Keys.js) according to your IP address and GOOGLE_MAP_KEY(frontend >>shared) to your Google maps API key. 
 2. Change GOOGLE_MAP_KEY(backend >> config.py) to your Google maps API key. 
+3. Change OPENWEATHER_API_KEY(backend >> config.py) to your OpenWeather Map API key. 
 
 ## Troubleshooting
 
