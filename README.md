@@ -5,8 +5,7 @@ Apart from the mobile application Django administration site is implemented as a
 
 ## Demo
 
-[![Watch the video](https://img.youtube.com/vi/I3PRPc7T0Ok/maxresdefault.jpg)](https://youtu.be/I3PRPc7T0Ok)
-
+[![Watch the video](https://img.youtube.com/vi/I3PRPc7T0Ok/0.jpg)](https://www.youtube.com/watch?v=I3PRPc7T0Ok)
 ## Main Features
 
 1. Registration of parents and children to the mobile app
@@ -83,6 +82,7 @@ $ python manage.py runserver
 
 1. Change the API_URL, WS_URL (frontend >> shared >> Keys.js) according to your IP address and GOOGLE_MAP_KEY(frontend >>shared) to your Google maps API key. 
 2. Change GOOGLE_MAP_KEY(backend >> config.py) to your Google maps API key. 
+3. Change OPENWEATHER_API_KEY(backend >> config.py) to your OpenWeather Map API key. 
 
 ## Troubleshooting
 
