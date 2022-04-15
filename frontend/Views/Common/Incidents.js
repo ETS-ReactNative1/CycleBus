@@ -1,5 +1,5 @@
 export const INCIDENTS = [
-    "Tire Punch",
+    "Tire puncture",
     "Deviation due to traffic",
-    "Stop duet to bad Weather"
+    "Stopping due to bad weather"
 ]

@@ -1,12 +1,3 @@
-// const initialState = {
-//   username: "", // Store `username` when user enters their username
-//   password: "", // Store `password` when user enters their password
-//   errors: {}, // Store error data from the backend here
-//   isAuthorized: false, // If auth is successful, set this to `true`
-//   isLoading: false, // Set this to `true` if You want to show spinner
-// };
-// <ROOT>/App/Views/Login/LoginView.js
-
 import React, { Component } from "react";
 import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
 import {Picker} from '@react-native-picker/picker';
@@ -59,7 +50,6 @@ class BusRegister extends Component {
     // Show spinner when call is made
     this.setState({ isLoading: true });
 
-    // APIKit.post("api/bus_register/", payload).then(onSuccess).catch(onFailure);
     this.props.navigation.navigate("Home")
   }
 
@@ -98,10 +88,6 @@ class BusRegister extends Component {
     }
     return message;
   }
-
-  // onSelectedValueChange = (value) => {
-  //   this.setState({ selectedValue: value });
-  // };
 
   render() {
     const { isLoading } = this.state;

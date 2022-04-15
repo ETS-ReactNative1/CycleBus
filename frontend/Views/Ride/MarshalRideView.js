@@ -130,6 +130,15 @@ class MarshalRide extends Component {
     const onSuccess = ({ data }) => {
       this.props.navigation.navigate("ParticipantView",{rideId:rideId});
       console.log("ride end " + data)
+
+      this.ws.send(
+        JSON.stringify(
+          {
+            type: 'ins',
+            data: "Ride Ended"
+          }
+        )
+      )
     };
 
     const onFailure = (error) => {
@@ -240,7 +249,7 @@ class MarshalRide extends Component {
 
   onJoined = async () => {
     const { children, rideId, currentLoc, currentPoint } = this.state;
-    // this.setState({ isStarted: false })
+   
     const payload = children.filter(
       (child) => { return child.isSelected }
     ).map((child) => {
@@ -270,7 +279,6 @@ class MarshalRide extends Component {
   }
 
 
-  //https://betterprogramming.pub/how-to-highlight-and-multi-select-items-in-a-flatlist-component-react-native-1ca416dec4bc
   selectItem = child => {
     child.isSelected = child.isSelected ? false : true;
 
@@ -311,7 +319,7 @@ class MarshalRide extends Component {
             />}
 
             {currentLoc && <GeoMarker
-              key={Math.floor(Math.random() * 1000) + 1}
+              key={Math.floor(Math.random() * 10000) + 1}
               coords={{ longitude: currentLoc.longitude, latitude: currentLoc.latitude }}
               icon="chevron-circle-down"
               color="red"
@@ -420,8 +428,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f6f6f6",
   },
   modal: {
-    //justifyContent: 'center',
-    //alignItems: 'center',
+    
     backgroundColor: "#FFFAFA",
     height: '50%',
     width: '80%',
@@ -431,7 +438,7 @@ const styles = StyleSheet.create({
     marginTop: 90,
     marginLeft: 40,
     padding: 20
-    // alignItems: 'center',
+   
 
   },
   item: {

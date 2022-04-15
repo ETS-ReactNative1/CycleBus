@@ -1,12 +1,3 @@
-// const initialState = {
-//   username: "", // Store `username` when user enters their username
-//   password: "", // Store `password` when user enters their password
-//   errors: {}, // Store error data from the backend here
-//   isAuthorized: false, // If auth is successful, set this to `true`
-//   isLoading: false, // Set this to `true` if You want to show spinner
-// };
-// <ROOT>/App/Views/Login/LoginView.js
-
 import React, { Component } from "react";
 import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
 import MapView, { Polyline } from "react-native-maps";

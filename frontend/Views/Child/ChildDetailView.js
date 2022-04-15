@@ -73,12 +73,7 @@ class ChildDetail extends Component {
                     renderItem={({ item }) =>
                         <View style={styles.busListItems}>
                             <Text style={styles.item}>{item.bus_name}</Text>
-                            {/* <View style={{ flex: 1, flexDirection: 'row-reverse' }}>
-                                {item.ride_id && <Button title='Ride' onPress={this.getListViewItem.bind(this, item)} />}
-                                <Button title='Select' onPress={this.selectListViewItem.bind(this, item)} />
-                            </View> */}
                         </View>
-
                     }
 
                     ItemSeparatorComponent={this.renderSeparator}

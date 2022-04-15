@@ -1,11 +1,3 @@
-// const initialState = {
-//   username: "", // Store `username` when user enters their username
-//   password: "", // Store `password` when user enters their password
-//   errors: {}, // Store error data from the backend here
-//   isAuthorized: false, // If auth is successful, set this to `true`
-//   isLoading: false, // Set this to `true` if You want to show spinner
-// };
-// <ROOT>/App/Views/Login/LoginView.js
 
 import React, { Component } from "react";
 import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
@@ -70,12 +62,6 @@ class ChildRegister extends Component {
     this.props.navigation.navigate("Login")
   }
 
-  // onPressAdd() {
-  //   //this.state = initialState
-  //   this.setState(initialState)
-  // }
-
-
   onPressRegister() {
     const { childName, childEmail, childStartLocation, childEndLocation, childUsername, childPassword, childPassword2 } = this.state;
     const payload = {
@@ -87,17 +73,17 @@ class ChildRegister extends Component {
           password: childPassword,
           password2: childPassword2
         },
-        start_location: childStartLocation,
-        end_location: childEndLocation
+        start_location: {eircode:childStartLocation},
+        end_location: {eircode:childEndLocation}
       }
     };
 
     console.log(payload);
 
     const onSuccess = ({ data }) => {
-      //this.setState({ isLoading: false });
+      
       this.setState(initialState);
-      //this.props.navigation.navigate("Login")
+     
     };
 
     const onFailure = (error) => {

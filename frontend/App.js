@@ -14,6 +14,7 @@ import RouteMap from "./Views/Map/RouteMapView";
 import MarshalRide from "./Views/Ride/MarshalRideView";
 import ParentRide from "./Views/Ride/ParentRideView";
 import EditProfile from "./Views/Profile/EditProfileView";
+import Profile from "./Views/Profile/ProfileView";
 import Participants from "./Views/Ride/ParticipantsView";
 
 const Stack = createNativeStackNavigator();
@@ -37,7 +38,7 @@ const App = () => {
         <Stack.Screen name="ChildDetail" component={ChildDetail} options={{ title: "Child Detail" }} />
         <Stack.Screen name="Register" component={Register} options={/**{ title: "Register" }**/ { headerShown: false }} />
         <Stack.Screen name="ChildRegister" component={ChildRegister} options={{ headerShown: false }} />
-        <Stack.Screen name="Parent" component={Parent} options={{ title: "Parent" }} />
+        <Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }}/>
         <Stack.Screen name="BusRegister" component={BusRegister} options={{ title: "Register to a Bus" }} />
         <Stack.Screen name="BusList" component={BusList} options={{ title: "Bus List " }} />
         <Stack.Screen name="ParentRide" component={ParentRide} options={{ title: "Ride View " }} />

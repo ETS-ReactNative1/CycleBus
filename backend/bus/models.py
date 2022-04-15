@@ -31,6 +31,8 @@ class Bus(models.Model):
     created_on = models.DateTimeField(default=timezone.now)
     last_updated = models.DateTimeField(blank=True, null=True)
 
+    class Meta:
+        verbose_name_plural = "Buses"
 
     def publish(self):
         self.last_updated = timezone.now()
@@ -49,7 +51,7 @@ class Route(models.Model):
     locations = models.ManyToManyField(Location, through='RouteIndex',verbose_name="route_locations",related_name="route_locations")
     
     def __str__(self):
-        return self.route_id
+        return str(self.route_id)
 
 class RouteIndex(models.Model):
     route = models.ForeignKey(Route, on_delete=models.CASCADE)

@@ -3,6 +3,7 @@ import math
 from tracemalloc import start
 from authentication.models import User
 from authentication.serializers import UserSerializer
+from config import OPENWEATHER_API_KEY
 from config import GOOGLE_MAP_KEY
 from user.models import JoinBusLocation
 from rest_framework import serializers
@@ -128,24 +129,30 @@ class RideSerializer(serializers.ModelSerializer):
         mode = "bicycling"
         key = GOOGLE_MAPS_API_KEY
         url = 'https://maps.googleapis.com/maps/api/distancematrix/json?origins=' + origin1 +'|'+destination1+ '&destinations=' + destination1 +"|"+destination2+ '&units=imperial&key=' + key + '&mode=' + mode
+        # call google distance matrix to get time between marshal location to school and join location
         res = requests.get(url).json()
         bus_to_join = res['rows'][0]['elements'][0]['duration']["value"]
         bus_to_school = res['rows'][0]['elements'][1]['duration']["value"]
 
-        weather_url = "https://api.openweathermap.org/data/2.5/weather?lat="+current_location.split(",")[0]+"&lon="+current_location.split(",")[1]+"&appid=6618c0e3c38b4cb7608cd2c418c97ade&units=metric"
+        # Call weather api to get weather data
+        weather_url = "https://api.openweathermap.org/data/2.5/weather?lat="+current_location.split(",")[0]+"&lon="+current_location.split(",")[1]+"&appid=" +OPENWEATHER_API_KEY+"&units=metric"
         res = requests.get(weather_url).json()
         return {
-            "Ride":"",
-            "  Route Name": instance.route.route_name,
-            "  Marshal Name": instance.marshal.name,
-            "  Start on": instance.start.strftime("%H:%M:%S") if instance.start else "",
-            "  End on": instance.end.strftime("%H:%M:%S") if instance.end else "",
-            "Bus Arrives ":"",
-            "  Join Location": str(math.floor(bus_to_join/60)) +"min" ,
-            "  School": str(math.floor(bus_to_school/60)) +"min",
-            "Weather":"",
-            "  Temparature": str(res["main"]["temp"])+"C" ,
-            "  Wind": str(res["wind"]["speed"]*3.6) +"km/h",
+            "ride":[
+                {"Route Name": instance.route.route_name},
+                {"Marshal Name": instance.marshal.name},
+                {"Start on": instance.start.strftime("%H:%M:%S") if instance.start else ""},
+                {"End on": instance.end.strftime("%H:%M:%S") if instance.end else ""}
+            ],
+            "time":[
+                {"Join Location": str(math.floor(bus_to_join/60)) +"min" },
+                {"School": str(math.floor(bus_to_school/60)) +"min"},
+            ],
+            "weather":[
+                {"Temparature": str(res["main"]["temp"])+"C"},
+                {"Wind Speed": str(round(res["wind"]["speed"]*3.6 ,2))+"km/h"},
+                {"Weather": str(res["weather"][0]["description"])}
+            ]
         }
 
 class AttendenceSerializer(serializers.ModelSerializer):

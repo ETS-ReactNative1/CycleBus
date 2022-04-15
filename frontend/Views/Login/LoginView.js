@@ -1,12 +1,3 @@
-// const initialState = {
-//   username: "", // Store `username` when user enters their username
-//   password: "", // Store `password` when user enters their password
-//   errors: {}, // Store error data from the backend here
-//   isAuthorized: false, // If auth is successful, set this to `true`
-//   isLoading: false, // Set this to `true` if You want to show spinner
-// };
-// <ROOT>/App/Views/Login/LoginView.js
-
 import React, { Component } from "react";
 import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
 
@@ -15,7 +6,6 @@ import Spinner from "react-native-loading-spinner-overlay";
 import APIKit, { setClientToken } from "../../shared/APIKit";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Animatable from 'react-native-animatable';
-//import LinearGradient from 'react-native-linear-gradient';
 import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
@@ -29,8 +19,8 @@ import {
 
 
 const initialState = {
-  username: "layani@gmail.com",
-  password: "layani@123",
+  username: "",
+  password: "",
   errors: {},
   isAuthorized: false,
   isLoading: false,
@@ -137,7 +127,8 @@ class Login extends Component {
         <Spinner visible={isLoading} />
 
         <View style={styles.header}>
-          <Text style={styles.text_header}>Welcome!</Text>
+          <Text style={styles.text_header_app}>CYCLE BUS </Text>
+          
         </View>
         <Animatable.View animation="fadeInUpBig" style={[styles.footer]}>
 
@@ -261,7 +252,15 @@ const styles = StyleSheet.create({
   text_header: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 30
+    fontSize: 30,
+    justifyContent: 'flex-start',
+  },
+  text_header_app: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 30,
+    textAlign: "center",
+    textShadowColor : '#fff'
   },
   text_footer: {
     color: { primaryColor: "blue" },
@@ -292,7 +291,6 @@ const styles = StyleSheet.create({
     marginTop: Platform.OS === 'ios' ? 0 : -12,
     paddingLeft: 10,
     color: '#05375a',
-    //color: utils.colors
   },
   errorMsg: {
     color: '#FF0000',

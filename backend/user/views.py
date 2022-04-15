@@ -29,7 +29,12 @@ class ChildAPIView(APIView):
         serializer = self.serializer_class(data=child)
         serializer.is_valid(raise_exception=True)
         user = serializer.save(parent=self.request.user)
-        return Response("Success", status=status.HTTP_201_CREATED)
+        if user:
+            return Response("Success", status=status.HTTP_201_CREATED)
+        else:
+            return Response("Invalid data", status=status.HTTP_400_BAD_REQUEST)
+            
+
 
     def put(self, request,  id):
         try:

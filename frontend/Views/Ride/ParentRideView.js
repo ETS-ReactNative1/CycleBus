@@ -1,14 +1,6 @@
-// const initialState = {
-//   username: "", // Store `username` when user enters their username
-//   password: "", // Store `password` when user enters their password
-//   errors: {}, // Store error data from the backend here
-//   isAuthorized: false, // If auth is successful, set this to `true`
-//   isLoading: false, // Set this to `true` if You want to show spinner
-// };
-// <ROOT>/App/Views/Login/LoginView.js
 
 import React, { Component } from "react";
-import { View, Text, TouchableOpacity, Image, TextInput, Button, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Image, TextInput, Button, Alert, SectionList } from "react-native";
 import MapView, { Polyline } from "react-native-maps";
 import { decode } from "@mapbox/polyline";
 import MapViewDirections from "react-native-maps-directions";
@@ -20,7 +12,6 @@ import GeoMarker from "./Marker";
 import axios from "axios";
 
 import BottomDrawer from "react-native-bottom-drawer-view";
-import { LinearGradient } from "expo-linear-gradient";
 import Spinner from "react-native-loading-spinner-overlay";
 import { color } from "../Common/Colors";
 import { keys } from "../../shared/Keys";
@@ -63,14 +54,14 @@ class ParentRide extends Component {
       marshalLocation: null,
       isDrawerVisible: false,
       time: 0,
-      stat: {},
+      stat: { ride: [], time: [], weather: [] },
       insidentMsg: "Swipe Up for More Information"
     };
 
 
     if (this.state.rideId != null) {
 
-      this.ws = new WebSocket(keys.WS_URL+"/ws/ride/" + this.state.rideId + "/");
+      this.ws = new WebSocket(keys.WS_URL + "/ws/ride/" + this.state.rideId + "/");
 
       this.ws.onopen = () => { };
       this.ws.onclose = (e) => { };
@@ -86,9 +77,9 @@ class ParentRide extends Component {
               longitude: parseFloat(data.split(",")[1]),
             },
           });
-        }else if(type=='ins'){
+        } else if (type == 'ins') {
           this.setState({
-            insidentMsg:  "INFO:"+data
+            insidentMsg: "Incident:" + data
           });
         }
 
@@ -143,7 +134,7 @@ class ParentRide extends Component {
         stat: data.stat
       })
     };
-
+    
     const onFailure = (error) => {
       console.log(error)
       this.setState({ errors: error.response.data, isLoading: false });
@@ -163,7 +154,7 @@ class ParentRide extends Component {
 
     const onSuccess = ({ data }) => {
       console.log(data)
-      
+
     };
 
     const onFailure = (error) => {
@@ -175,33 +166,35 @@ class ParentRide extends Component {
 
   }
 
-  onPressInform =()=>{
+  onPressInform = () => {
     Alert.alert(
       "Participation",
       "Would your child join the bus today? ",
       [
         {
           text: "Yes",
-          onPress: () => {this.inform("Coming")},
+          onPress: () => { this.inform("Coming") },
           style: "yes",
         },
         {
           text: "No",
-          onPress: () => {this.inform("Not Coming")},
+          onPress: () => { this.inform("Not Coming") },
           style: "no",
         },
         {
           text: "Cancel",
-          onPress: () => {},
+          onPress: () => { },
           style: "cancel",
         },
       ],
       {
         cancelable: true,
-        onDismiss: () => {}
+        onDismiss: () => { }
       },
-      );
+    );
+
   }
+  
 
   render() {
     const { insidentMsg, stat, isLoading, isDrawerVisible, marshalLocation, startLocation, endLocation, joinLocation } = this.state;
@@ -248,8 +241,8 @@ class ParentRide extends Component {
             {endLocation &&
               <GeoMarker
                 coords={endLocation}
-              icon="chevron-circle-down"
-                
+                icon="chevron-circle-down"
+
                 size={20}
               />
             }
@@ -266,7 +259,7 @@ class ParentRide extends Component {
           </MapView>
         </View>
         <BottomDrawer
-          containerHeight={400}
+          containerHeight={410}
           offset={50}
           onExpanded={() => this.rideInfo()}
           onCollapsed={() => this.setState({ isDrawerVisible: false })}
@@ -290,17 +283,26 @@ class ParentRide extends Component {
 
                 <TouchableOpacity
                   style={styles.button}
-                //onPress={this.onPressLogin.bind(this)}
+
                 >
                   <Text style={styles.textButton}>Call</Text>
                 </TouchableOpacity>
 
               </View>
               <View style={styles.stat}>
-                {isDrawerVisible &&
-                  Object.keys(stat).map((key, index) => {
-                    return <Text style={styles.statTxt} key={index}>{key + " : "+stat[key]}</Text>
-                  })
+                {isDrawerVisible && stat &&
+                  <SectionList
+                    sections={[
+                      { title: 'Ride', data: stat.ride },
+                      { title: 'Bus Arrival Time', data: stat.time },
+                      { title: 'Weather', data: stat.weather },
+                    ]}
+                    renderItem={({ item }) => {
+                      return <StatData item={item} />
+                    }}
+                    renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}>{section.title}</Text>}
+                    keyExtractor={(item, index) => index}
+                  />
                 }
               </View>
             </View>
@@ -311,6 +313,19 @@ class ParentRide extends Component {
     );
   }
 }
+
+StatData = (item) => {
+  const key = Object.keys(item.item)[0]
+  const val = Object.values(item.item)[0]
+
+  return(
+  <View style={{ flexDirection: 'row' }}>
+    <Text style={styles.statTxtKey}>{key}:</Text>
+    <Text style={styles.statTxt}>{val}</Text>
+  </View>
+  )
+}
+
 
 const styles = StyleSheet.create({
   container: {
@@ -328,6 +343,22 @@ const styles = StyleSheet.create({
     color: '#1E90FF',
     width: "80%"
   },
+  item: {
+    paddingTop: 5,
+    paddingLeft: 10,
+    fontSize: 18,
+    height: 44,
+  },
+  sectionHeader: {
+    paddingTop: 2,
+    paddingLeft: 10,
+    paddingRight: 10,
+    paddingBottom: 2,
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: "#fff",
+    backgroundColor: '#1e90ff',
+  },
   msg: {
     width: "100%",
     alignItems: 'center',
@@ -342,27 +373,34 @@ const styles = StyleSheet.create({
   },
   button: {
     width: '40%',
-    height: 50,
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
     backgroundColor: '#1E90FF',
-    elevation:2,
-    margin:10,
+    elevation: 2,
+    margin: 10,
   },
   textButton: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
   statTxt: {
     fontSize: 15,
     color: color.DARK_BLUE,
-    margin:2
+    margin: 2,
+    fontWeight: "bold"
+  },
+  statTxtKey: {
+    fontSize: 15,
+    color: color.DARK_BLUE,
+    margin: 2,
+    
   },
   btnView: {
-      alignItems: 'center',
-      color: '#1E90FF',
+    alignItems: 'center',
+    color: '#1E90FF',
   },
 });
 

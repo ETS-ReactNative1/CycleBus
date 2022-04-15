@@ -84,7 +84,7 @@ class EditProfile extends Component {
     // Show spinner when call is made
     this.setState({ isLoading: true });
 
-    APIKit.put("profile/" + userId + '/', payload).then(onSuccess).catch(onFailure);
+    APIKit.post("profile/" + userId + '/', payload).then(onSuccess).catch(onFailure);
     console.log(payload);
   }
 

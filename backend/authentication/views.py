@@ -18,7 +18,7 @@ class RegistrationAPIView(APIView):
     def post(self, request):
         user = request.data.get('user', {})
         #role = user.pop('role','parent')
-
+        print(user)
         # Create serializer, validate serializer, save serializer 
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)

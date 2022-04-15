@@ -1,12 +1,3 @@
-// const initialState = {
-//   username: "", // Store `username` when user enters their username
-//   password: "", // Store `password` when user enters their password
-//   errors: {}, // Store error data from the backend here
-//   isAuthorized: false, // If auth is successful, set this to `true`
-//   isLoading: false, // Set this to `true` if You want to show spinner
-// };
-// <ROOT>/App/Views/Login/LoginView.js
-
 import React, { Component } from "react";
 import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
 
@@ -25,7 +16,7 @@ const initialState = {
   isLoading: false,
 };
 
-class Parent extends Component {
+class Parentextra extends Component {
   state = initialState;
 
   componentWillUnmount() {}
@@ -63,7 +54,6 @@ class Parent extends Component {
       // Set JSON Web Token on success
       setClientToken(data.token);
       console.log(data);
-      //AsyncStorage.setItem("user", JSON.stringify(auth));
       this.setState({ isLoading: false, isAuthorized: true });
     };
 
@@ -256,14 +246,14 @@ class Parent extends Component {
   }
 }
 
-// Define some colors and default sane values
+
 const utils = {
   colors: { primaryColor: "blue" },
   dimensions: { defaultPadding: 12 },
   fonts: { largeFontSize: 18, mediumFontSize: 16, smallFontSize: 12 },
 };
 
-// Define styles here
+
 const styles = {
   innerContainer: {
     marginBottom: 32,
@@ -323,4 +313,4 @@ const styles = {
   },
 };
 
-export default Parent;
+export default Parentextra;
